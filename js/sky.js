@@ -11,8 +11,8 @@ const up = new THREE.Vector3( 0, 1, 0 );
 const scene = new THREE.Scene();
 scene.background = new THREE.Color( 0x101050 );
 
-const fov = 60;
 const aspect = canvas.width / canvas.height;
+const fov = Math.min( 60 * Math.max( 1, 1/aspect ), 100 );
 const near = 0.1;
 const far = 50;
 const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
@@ -91,6 +91,8 @@ function resizeRendererToDisplaySize( renderer ) {
 
     const aspect = canvas.width / canvas.height;
     camera.aspect = aspect;
+    camera.fov = Math.min( 60 * Math.max( 1, 1/aspect ), 100 );
+    console.log(camera.fov)
     camera.updateProjectionMatrix();
 }
 
