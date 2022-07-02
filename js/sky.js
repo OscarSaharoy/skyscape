@@ -70,8 +70,8 @@ export function panCamera( delta ) {
      || up.dot(cameraForward) < 0 && delta.y > 0 )
         over.normalize();
 
-    const sensitivity = -12 / (0.85*camera.zoom + 2.15); 
-
+    const sensitivity = -12 / (1.2*camera.zoom + 1.8);
+    
     const adjust = new THREE.Vector3().addVectors(
         right.multiplyScalar(delta.x),
         over.multiplyScalar(delta.y)
