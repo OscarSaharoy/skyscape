@@ -7,7 +7,7 @@ import { skyVert, skyFrag } from "./shaders.js";
 const canvas = document.querySelector( "#shader-canvas" );
 const renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
 const dpr   = window.devicePixelRatio;
-renderer.setPixelRatio(dpr);
+//renderer.setPixelRatio(dpr);
 
 const up = new THREE.Vector3( 0, 1, 0 );
 
