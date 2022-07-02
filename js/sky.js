@@ -1,10 +1,13 @@
 // Oscar Saharoy 2022
 
-import * as THREE from "https://unpkg.com/three@0.140.0/build/three.module.js"; 
+import * as THREE from 'three'; 
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { skyVert, skyFrag } from "./shaders.js";
 
 const canvas = document.querySelector( "#shader-canvas" );
 const renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
 const dpr   = window.devicePixelRatio;
+renderer.setPixelRatio(dpr);
 
 const up = new THREE.Vector3( 0, 1, 0 );
 
@@ -14,7 +17,7 @@ scene.background = new THREE.Color( 0x101050 );
 const aspect = canvas.width / canvas.height;
 const fov = Math.min( 60 * Math.max( 1, 1/aspect ), 100 );
 const near = 0.1;
-const far = 50;
+const far = 30;
 const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
 const cameraForward = new THREE.Vector3( 0, 0, -1 );
 
@@ -22,21 +25,28 @@ const cameraForward = new THREE.Vector3( 0, 0, -1 );
     const geometry = new THREE.PlaneGeometry( 100, 100 );
     const material = new THREE.MeshBasicMaterial( {color: 0x000000} );
     const plane = new THREE.Mesh( geometry, material );
-    plane.position.y = -2;
+    plane.position.y = -0.2;
     plane.rotateX( -Math.PI / 2);
     scene.add( plane );
 }
 
-{
-    const geometry = new THREE.TorusKnotGeometry( 10, 3, 100, 16 );
-    const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
-    const torusKnot = new THREE.Mesh( geometry, material );
-    scene.add( torusKnot );
-}
+
+const skyUniforms = {
+    uTime:       { value: 0 },
+    uResolution: { value: new THREE.Vector2() },
+};
+
+const skyMaterial = new THREE.ShaderMaterial({
+    vertexShader: skyVert,
+    fragmentShader: skyFrag,
+    uniforms: skyUniforms,
+    side: THREE.BackSide
+});
+
 
 {
-    const geometry = new THREE.SphereGeometry( 4, 5, 5 );
-    const material = new THREE.MeshBasicMaterial( { color: 0x0000ff, side: THREE.BackSide } );
+    const geometry = new THREE.IcosahedronGeometry( 1, 3 );
+    const material = skyMaterial; // new THREE.MeshBasicMaterial( { color: 0x0000ff, side: THREE.BackSide } );
     const sphere = new THREE.Mesh( geometry, material );
     scene.add( sphere );
 
@@ -45,21 +55,17 @@ const cameraForward = new THREE.Vector3( 0, 0, -1 );
     sphere.onAfterRender = renderer => renderer.clearDepth();
 }
 
-
-// const uniforms = {
-//     uTime:          { value: 0 },
-//     uResolution:    { value: new THREE.Vector2() },
-// };
-// 
-// const material = new THREE.ShaderMaterial({
-//     fragmentShader: fragmentShader,
-//     uniforms: uniforms,
-//     transparent: true,
-//     precision: "highp",
-// });
-// 
-// scene.add(new THREE.Mesh(plane, material));
-
+{
+    const loader = new GLTFLoader();
+    
+    loader.load(
+        "../city.glb",
+        gltf => {
+			scene.add( gltf.scene );
+			gltf.scene.position.y = -0.2;
+		}
+    );
+}
 
 export function panCamera( delta ) {
 

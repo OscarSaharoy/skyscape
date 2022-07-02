@@ -15,8 +15,8 @@ function getRelativePointerPos( event ) {
     const canvasBox = canvas.getBoundingClientRect();
     const maxDimension = Math.max( canvasBox.width, canvasBox.height );
 
-    const pointerX = event.clientX;
-    const pointerY = event.clientY;
+    const pointerX = event.clientX - canvasBox.width  / 2;
+    const pointerY = event.clientY - canvasBox.height / 2;
 
     return new THREE.Vector3( pointerX / maxDimension, pointerY / maxDimension, 0 ); 
 }
