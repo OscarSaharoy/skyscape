@@ -34,6 +34,17 @@ const cameraForward = new THREE.Vector3( 0, 0, -1 );
     scene.add( torusKnot );
 }
 
+{
+    const geometry = new THREE.SphereGeometry( 4, 5, 5 );
+    const material = new THREE.MeshBasicMaterial( { color: 0x0000ff, side: THREE.BackSide } );
+    const sphere = new THREE.Mesh( geometry, material );
+    scene.add( sphere );
+
+    // render the sphere first and clear depth buffer straight after so it appears behind everything
+    sphere.renderOrder = -1;
+    sphere.onAfterRender = renderer => renderer.clearDepth();
+}
+
 
 // const uniforms = {
 //     uTime:          { value: 0 },
@@ -71,7 +82,7 @@ export function panCamera( delta ) {
     camera.lookAt( cameraForward );
 }
 
-export function zoomCamera( delta ) {
+export function zoomCamera( delta, centre ) {
     
     const adjust = 1.17 ** delta;
 

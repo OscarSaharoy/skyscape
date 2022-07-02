@@ -12,11 +12,11 @@ let prevPointerSpread = 0;
 
 function getRelativePointerPos( event ) {
 
-    const pointerX = event.clientX;
-    const pointerY = event.clientY;
-
     const canvasBox = canvas.getBoundingClientRect();
     const maxDimension = Math.max( canvasBox.width, canvasBox.height );
+
+    const pointerX = event.clientX;
+    const pointerY = event.clientY;
 
     return new THREE.Vector3( pointerX / maxDimension, pointerY / maxDimension, 0 ); 
 }
@@ -77,17 +77,18 @@ function controlsLoop() {
 
     const spreadDelta = getPointerSpread( activePointers ) - prevPointerSpread;
     prevPointerSpread = getPointerSpread( activePointers );
-    zoomCamera( spreadDelta * 40 );
+    zoomCamera( spreadDelta * 40, getMeanPointerPos(activePointers) );
 }
 controlsLoop();
 
 function onWheel( event ) {
 
-    zoomCamera( -event.deltaY / 200 ); 
+    zoomCamera( -event.deltaY / 200, getRelativePointerPos(event) ); 
 }
 
 canvas.addEventListener( "pointerdown", onPointerdown );
 canvas.addEventListener( "pointermove", onPointermove );
 canvas.addEventListener( "pointerup", onPointerup );
+canvas.addEventListener( "pointerleave", onPointerup );
 canvas.addEventListener( "wheel", onWheel );
 
