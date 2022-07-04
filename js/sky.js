@@ -32,8 +32,9 @@ const cameraForward = new THREE.Vector3( 0, 0, -1 );
 
 
 const skyUniforms = {
-    uTime:       { value: 0 },
+    uTime:       { value: 0. },
     uResolution: { value: new THREE.Vector2() },
+	uZoom:       { value: 1. }
 };
 
 const skyMaterial = new THREE.ShaderMaterial({
@@ -95,6 +96,8 @@ export function zoomCamera( delta, centre ) {
     camera.zoom *= adjust;
     camera.zoom = Math.max( 0.5, camera.zoom );
     camera.updateProjectionMatrix();
+
+	skyUniforms.uZoom.value = camera.zoom;
 }
 
 

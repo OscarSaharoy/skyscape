@@ -20,6 +20,7 @@ void main() {
 
 uniform float uTime;
 uniform vec2 uResolution;
+uniform float uZoom;
 
 varying vec3 vNormal;
 
@@ -136,40 +137,48 @@ vec3 simplexNoise3(vec3 pos) {
 
 vec3 starLight( in vec3 viewDir ) {
 
-    float cellSize = 0.08;
-
-    vec3 cell = floor( viewDir / cellSize );
-    vec3 offset = hash3( cell ) * 0. + 0.5;
-
-    vec3 cellPos = mod( viewDir + 0.4*simplexNoise3(viewDir * 1.), vec3(1) * cellSize ) / cellSize;
-    vec3 freakedCellPos = cellPos - offset;
-    float freakedLength = length( freakedCellPos );
-    float light = clamp( 0.015 / freakedLength - 0.2, 0., 1. );
-
-    //return simplexNoise3(viewDir);
-    //return vec3(freakedCellPos);
-    //return vec3( light );
-
-	//return viewDir;
-
-	float bandHeight = 0.1;
+	float bandHeight = 0.05;
     vec3 up = vec3(0, 1, 0);
 	float phi = acos( dot( up, viewDir ) );
-	float band = floor( phi / bandHeight ) * bandHeight;
-	float bandPos = mod( phi, bandHeight );
+	float band = floor( phi / bandHeight ) 
+		       * bandHeight;
 
 	float areaMiddle = bandHeight * bandHeight;
 	float topHeight = cos( band );
 	float bottomHeight = cos( band + bandHeight );
 	float bandArea = 
-		2 * PI * ( topHeight - bottomHeight );
+		2. * PI * ( topHeight - bottomHeight );
+	float divisions = floor( bandArea / areaMiddle );
 
-	float theta = atan( -viewDir.x, -viewDir.z );
-	float cellLength = 0.1;
-	float cellId = floor( theta / cellLength );
-	float cellHash = hash( hash( band ) + cellId );
+	float theta = atan( -viewDir.x, -viewDir.z ) + PI;
+	float cellLength = 2.*PI / divisions;
+	float cell = floor( theta / cellLength ) 
+			   * cellLength;
 
-	return vec3(cellHash);
+	vec3 cellCoords = vec3(band, cell, 0.); 
+
+	float phic = (phi - band) / bandHeight;
+	float thetac = (theta - cell) / cellLength;
+
+	vec3 celluv = vec3( phic - .5, thetac - .5, 0. );
+	celluv += hash3( cellCoords )
+			* vec3( .5, .5, 0. )
+			- vec3( .25, .25, 0. );
+
+	float brightness = pow( 
+		hash13( cellCoords * 50. ), .2
+	);
+
+	float poleMask = step( bandHeight, phi );
+
+	return vec3(
+		saturate(
+			- .1 +
+			1.1 / length(50. * celluv * sqrt(uZoom)
+				         / (1.-brightness))
+		) 
+		* poleMask
+	);
 }
 
 
@@ -180,13 +189,13 @@ void main() {
     vec3 black = vec3(0);
     vec3 blue = vec3(0, 112, 147) / 255.;
     vec3 up = vec3(0, 1, 0);
-    float upness = dot(viewDir, up);
+    float upness = dot(viewDir, up)
+				 + hash13( viewDir * 1000. ) * .06;
 
-    gl_FragColor.rgb = mix(black, blue, pow(11., -upness));
+    gl_FragColor.rgb = mix(black, blue, pow(11., -upness)) * .3;
     gl_FragColor.a = 1.;
 
     gl_FragColor.rgb += starLight( viewDir );
-    gl_FragColor.rgb = starLight( viewDir );
     //gl_FragColor.rgb = vNormal;
 }
 
