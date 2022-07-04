@@ -23,11 +23,21 @@ uniform vec2 uResolution;
 
 varying vec3 vNormal;
 
+#define PI 3.14159
+
+float saturate( float x ) {
+	return clamp( x, 0., 1. );
+}
+
 float hash13(vec3 p3) {
 
 	p3  = fract(p3 * .1031);
     p3 += dot(p3, p3.zyx + 31.32);
     return fract((p3.x + p3.y) * p3.z);
+}
+
+float hash( float x ) {
+	return hash13( vec3(x) );
 }
 
 
@@ -139,14 +149,27 @@ vec3 starLight( in vec3 viewDir ) {
     //return simplexNoise3(viewDir);
     //return vec3(freakedCellPos);
     //return vec3( light );
-    //
-    viewDir = viewDir + 0.4 * simplexNoise3(viewDir);
-    
-    float zsin = sin( dot(viewDir, vec3(0,0,1)) * 50. );
-    float xsin = sin( dot(viewDir, vec3(1,0,0)) * 50. );
-    float ysin = sin( dot(viewDir, vec3(0,1,0)) * 50. );
 
-    return vec3(xsin * zsin * ysin);
+	//return viewDir;
+
+	float bandHeight = 0.1;
+    vec3 up = vec3(0, 1, 0);
+	float phi = acos( dot( up, viewDir ) );
+	float band = floor( phi / bandHeight ) * bandHeight;
+	float bandPos = mod( phi, bandHeight );
+
+	float areaMiddle = bandHeight * bandHeight;
+	float topHeight = cos( band );
+	float bottomHeight = cos( band + bandHeight );
+	float bandArea = 
+		2 * PI * ( topHeight - bottomHeight );
+
+	float theta = atan( -viewDir.x, -viewDir.z );
+	float cellLength = 0.1;
+	float cellId = floor( theta / cellLength );
+	float cellHash = hash( hash( band ) + cellId );
+
+	return vec3(cellHash);
 }
 
 
@@ -163,6 +186,7 @@ void main() {
     gl_FragColor.a = 1.;
 
     gl_FragColor.rgb += starLight( viewDir );
+    gl_FragColor.rgb = starLight( viewDir );
     //gl_FragColor.rgb = vNormal;
 }
 
