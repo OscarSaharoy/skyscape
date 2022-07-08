@@ -8,8 +8,11 @@ export const skyVert = `
 varying vec3 vNormal;
 
 void main() {
-    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-    vNormal = normal;
+	
+    gl_Position = projectionMatrix 
+				* modelViewMatrix 
+				* vec4( position, 1.0 );
+    vNormal     = normal;
 }
 
 // ====================================================================================
@@ -24,7 +27,9 @@ uniform float uZoom;
 
 varying vec3 vNormal;
 
-#define PI 3.14159
+#define PI 3.14159265
+#define UP vec3(0, 1, 0)
+#define DOWN vec3(0, -1, 0)
 
 float saturate( float x ) {
 	return clamp( x, 0., 1. );
@@ -44,9 +49,11 @@ float hash( float x ) {
 
 vec3 hash3( vec3 p ) {
 
-    vec3 q = vec3( dot( p, vec3(127.1,311.7,432.2) ), 
-                   dot( p, vec3(269.5,183.3,847.6) ), 
-                   dot( p, vec3(419.2,371.9,927.0) ) );
+    vec3 q = vec3( 
+		dot( p, vec3(127.1,311.7,432.2) ), 
+		dot( p, vec3(269.5,183.3,847.6) ), 
+		dot( p, vec3(419.2,371.9,927.0) )
+	);
 
     return fract(sin(q)*43758.5453);
 }
@@ -135,25 +142,66 @@ vec3 simplexNoise3(vec3 pos) {
     );
 }
 
-vec3 starLight( in vec3 viewDir ) {
+vec3 dirToCellUV( vec3 dir,
+		float bandOffset, float cellOffset ) {
 
 	float bandHeight = 0.05;
-    vec3 up = vec3(0, 1, 0);
-	float phi = acos( dot( up, viewDir ) );
+	float phi = acos( dot( UP, dir ) );
 	float band = floor( phi / bandHeight ) 
-		       * bandHeight;
+		       * bandHeight + bandOffset * bandHeight;
 
 	float areaMiddle = bandHeight * bandHeight;
 	float topHeight = cos( band );
 	float bottomHeight = cos( band + bandHeight );
-	float bandArea = 
-		2. * PI * ( topHeight - bottomHeight );
+	float bandArea = 2. * PI 
+				   * ( topHeight - bottomHeight );
+	float divisions = floor( bandArea / areaMiddle );
+
+	float theta = atan( -dir.x, -dir.z ) + PI;
+	float cellLength = 2. * PI / divisions;
+	float cell = floor( theta / cellLength ) 
+			   * cellLength + cellOffset * cellLength;
+
+	vec3 cellCoords = vec3(band, cell, 0.); 
+
+	float phic = (phi - band) / bandHeight;
+	float thetac = (theta - cell) / cellLength;
+
+	vec3 celluv = vec3(
+		phic - .5,
+		thetac - .5,
+		hash( hash(band) + cell )
+	);
+
+	return celluv;
+}
+
+vec3 starFunction( vec3 celluv ) {
+
+	return vec3(saturate(
+		.1 - length(celluv)
+	)) * 10.;
+}
+
+vec3 starLight( vec3 viewDir, 
+		float bandOffset, float cellOffset ) {
+
+	float bandHeight = 0.05;
+	float phi = acos( dot( UP, viewDir ) );
+	float band = floor( phi / bandHeight ) 
+		       * bandHeight + bandOffset * bandHeight;
+
+	float areaMiddle = bandHeight * bandHeight;
+	float topHeight = cos( band );
+	float bottomHeight = cos( band + bandHeight );
+	float bandArea = 2. * PI 
+				   * ( topHeight - bottomHeight );
 	float divisions = floor( bandArea / areaMiddle );
 
 	float theta = atan( -viewDir.x, -viewDir.z ) + PI;
-	float cellLength = 2.*PI / divisions;
+	float cellLength = 2. * PI / divisions;
 	float cell = floor( theta / cellLength ) 
-			   * cellLength;
+			   * cellLength + cellOffset * cellLength;
 
 	vec3 cellCoords = vec3(band, cell, 0.); 
 
@@ -161,15 +209,20 @@ vec3 starLight( in vec3 viewDir ) {
 	float thetac = (theta - cell) / cellLength;
 
 	vec3 celluv = vec3( phic - .5, thetac - .5, 0. );
-	celluv += hash3( cellCoords )
-			* vec3( .5, .5, 0. )
-			- vec3( .25, .25, 0. );
+	float jitter = .75;
+	celluv += (hash3( cellCoords ) - .5)
+			* vec3(jitter, jitter, 0.);
+	
+	float poleMask = step( bandHeight, phi );
+
+	return vec3(saturate(
+		.1 - length(celluv)
+	)) * 10. * poleMask;
+	return celluv;
 
 	float brightness = pow( 
 		hash13( cellCoords * 50. ), .2
 	);
-
-	float poleMask = step( bandHeight, phi );
 
 	return vec3(
 		saturate(
@@ -195,8 +248,16 @@ void main() {
     gl_FragColor.rgb = mix(black, blue, pow(11., -upness)) * .3;
     gl_FragColor.a = 1.;
 
-    gl_FragColor.rgb += starLight( viewDir );
-    //gl_FragColor.rgb = vNormal;
+	for( float bo=-1.; bo<1.1; ++bo)
+	for( float co=-1.; co<1.1; ++co) {
+		vec3 celluv = dirToCellUV( viewDir, bo, co );
+
+		float jitter = .75;
+		celluv += (vec3(1.) - .5)
+				* vec3(jitter, jitter, 0.);
+
+		gl_FragColor.rgb += starFunction( celluv );
+	}
 }
 
 // ====================================================================================
