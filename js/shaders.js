@@ -24,6 +24,7 @@ void main() {
 uniform float uTime;
 uniform vec2 uResolution;
 uniform float uZoom;
+uniform mat3 uSkyRotation;
 
 varying vec3 vNormal;
 
@@ -47,10 +48,17 @@ float hash11(float p) {
     return fract(p);
 }
 
+vec2 hash12(float p) {
+	vec2 p2 = fract(vec2(p) 
+			* vec2(536.1031, 465.1030));
+	p2 += dot(p2, p2.yx+33.33);
+	return fract((p2.xy+p2.yy)*p2.yx);
+}
+
 vec3 hash13(float p) {
 	vec3 p3 = fract(vec3(p) 
 			* vec3(.1031, .1030, .0973));
-	p3 += dot(p3, p3.yzx+33.33);
+	p3 += dot(p3, p3.yzx+337.33);
 	return fract((p3.xxy+p3.yzz)*p3.zyx);
 }
 
@@ -111,16 +119,7 @@ vec3 dirToCellUV( vec3 dir,
 
 vec3 starFunction( vec3 celluv ) {
 
-    float size
-        = pow( celluv.z, 4. )
-        * pow(2. - celluv.z, -15.);
-    
-    size
-        = saturate(0.2*celluv.z - 0.05)
-        + saturate(20.*(celluv.z-1.)+1.);
-
-    size
-        = pow(celluv.z, 15.);
+    float size = pow(celluv.z, 15.);
 
 	return saturate(vec3(
 		1. / length(celluv.xy)
@@ -141,9 +140,7 @@ void main() {
 	for( float co=-1.; co<1.1; ++co) {
 		vec3 celluv = dirToCellUV( viewDir, bo, co );
 
-		float jitter = .7;
-		celluv += (hash13(celluv.z) - .5)
-				* vec3(jitter, jitter, 0.);
+		celluv.xy += (hash12(celluv.z * 100.) - .5);
 
 		gl_FragColor.rgb += starFunction( celluv );
 	}

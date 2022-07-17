@@ -32,9 +32,9 @@ const cameraForward = new THREE.Vector3( 0, 0, -1 );
 
 
 const skyUniforms = {
-    uTime:       { value: 0. },
-    uResolution: { value: new THREE.Vector2() },
-	uZoom:       { value: 1. }
+    uTime:        { value: 0. },
+    uResolution:  { value: new THREE.Vector2() },
+	uZoom:        { value: 1. },
 };
 
 const skyMaterial = new THREE.ShaderMaterial({
@@ -122,7 +122,7 @@ function render( time ) {
     requestAnimationFrame(render);
 
     renderer.render(scene, camera);
-    uniforms.uTime.value = time * 0.001;
+    skyUniforms.uTime.value = time * 0.001;
 }
 
 requestAnimationFrame(render);
