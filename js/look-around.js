@@ -1,12 +1,14 @@
 // Oscar Saharoy 2022
 
 import * as THREE from "https://unpkg.com/three@0.140.0/build/three.module.js"; 
-import { panCamera, zoomCamera } from "./sky.js";
+import { camera, panCamera, rotateCamera, zoomCamera } from "./sky.js";
 
 const canvas = document.querySelector( "#shader-canvas" );
 
 const activePointers = {};
+const activePointersNDC = {};
 let prevMeanPointer = new THREE.Vector3();
+let prevMeanPointerNDC = new THREE.Vector3();
 let prevPointerSpread = 0;
 
 
@@ -19,6 +21,16 @@ function getRelativePointerPos( event ) {
     const pointerY = event.clientY - canvasBox.height / 2;
 
     return new THREE.Vector3( pointerX / maxDimension, pointerY / maxDimension, 0 ); 
+}
+
+function getPointerNDC( event ) {
+	
+    const canvasBox = canvas.getBoundingClientRect();
+
+    const pointerX = 2. * event.clientX - canvasBox.width;
+    const pointerY = 2. * event.clientY - canvasBox.height;
+
+	return new THREE.Vector3( pointerX / canvasBox.width, - pointerY / canvasBox.height, 0 );
 }
 
 function getMeanPointerPos( activePointers ) {
@@ -36,13 +48,15 @@ function getPointerSpread( activePointers ) {
                  .reduce( (acc, val) => acc + mean.distanceTo(val), 0 );
 }
 
+
 function onPointerdown( event ) {
 
     activePointers[event.pointerId] = getRelativePointerPos( event );
+    activePointersNDC[event.pointerId] = getPointerNDC( event );
     
     prevMeanPointer = getMeanPointerPos( activePointers );
+    prevMeanPointerNDC = getMeanPointerPos( activePointersNDC );
     prevPointerSpread = getPointerSpread( activePointers );
-    canvas.style.cursor = "grabbing";
 }
 
 function onPointermove( event ) {
@@ -50,6 +64,10 @@ function onPointermove( event ) {
     if( !(event.pointerId in activePointers) ) return;
 
     activePointers[event.pointerId] = getRelativePointerPos( event );
+    activePointersNDC[event.pointerId] = getPointerNDC( event );
+
+	if( canvas.style.cursor != "grabbing" )
+		canvas.style.cursor  = "grabbing";
 }
 
 function onPointerup( event ) {
@@ -57,11 +75,13 @@ function onPointerup( event ) {
     // remove the pointer from activePointers
     // (does nothing if it wasnt in them)
     delete activePointers[event.pointerId];
+    delete activePointersNDC[event.pointerId];
     
     if( !Object.keys(activePointers).length ) 
         return canvas.style.cursor = "auto";
 
     prevMeanPointer = getMeanPointerPos( activePointers );
+    prevMeanPointerNDC = getMeanPointerPos( activePointersNDC );
     prevPointerSpread = getPointerSpread( activePointers );
 }
 
@@ -75,6 +95,15 @@ function controlsLoop() {
     prevMeanPointer = getMeanPointerPos( activePointers ); 
     panCamera( meanDelta );
 
+	const prevMeanPointerDir = prevMeanPointerNDC
+		.unproject( camera )
+		.normalize();
+	const meanPointerDir = getMeanPointerPos( activePointersNDC )
+		.unproject( camera )
+		.normalize();
+	rotateCamera( prevMeanPointerDir, meanPointerDir );
+    prevMeanPointerNDC = getMeanPointerPos( activePointersNDC ); 
+
     const spreadDelta = getPointerSpread( activePointers ) - prevPointerSpread;
     prevPointerSpread = getPointerSpread( activePointers );
     zoomCamera( spreadDelta * 40, getMeanPointerPos(activePointers) );
@@ -83,6 +112,7 @@ controlsLoop();
 
 function onWheel( event ) {
 
+	event.preventDefault();
     zoomCamera( -event.deltaY / 200, getRelativePointerPos(event) ); 
 }
 
@@ -90,5 +120,5 @@ canvas.addEventListener( "pointerdown", onPointerdown );
 canvas.addEventListener( "pointermove", onPointermove );
 canvas.addEventListener( "pointerup", onPointerup );
 canvas.addEventListener( "pointerleave", onPointerup );
-canvas.addEventListener( "wheel", onWheel );
+canvas.addEventListener( "wheel", onWheel, {passive: false} );
 

@@ -99,6 +99,11 @@ vec3 dirToCellUV( vec3 dir,
 	float phic = (phi - band) / bandHeight;
 	float thetac = (theta - cell) / cellLength;
 
+	if(cellOffset < 0. && theta < cellLength)
+		cell += divisions * cellLength;
+	if(cellOffset > 0. && theta > 2.*PI - cellLength)
+		cell -= divisions * cellLength;
+
 	vec3 celluv = vec3(
 		phic - .5,
 		thetac - .5,
@@ -111,9 +116,9 @@ vec3 dirToCellUV( vec3 dir,
 vec3 starFunction( vec3 celluv ) {
 
 	return saturate(vec3(
-		.1 / length(celluv.xy)
+		.01 / length(celluv.xy)
 			* pow(celluv.z, 15.)
-			- .1
+			- .05
 	));
 }
 

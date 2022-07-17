@@ -18,7 +18,7 @@ const aspect = canvas.width / canvas.height;
 const fov = Math.min( 60 * Math.max( 1, 1/aspect ), 100 );
 const near = 0.1;
 const far = 30;
-const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+export const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
 const cameraForward = new THREE.Vector3( 0, 0, -1 );
 
 {
@@ -69,6 +69,7 @@ const skyMaterial = new THREE.ShaderMaterial({
 }
 
 export function panCamera( delta ) {
+	return;
 
     const right = new THREE.Vector3().crossVectors( cameraForward, up );
     const over = new THREE.Vector3().crossVectors( cameraForward, right );
@@ -87,6 +88,19 @@ export function panCamera( delta ) {
     cameraForward.add( adjust );
     cameraForward.normalize();
     camera.lookAt( cameraForward );
+}
+
+export function rotateCamera( prevReferenceDir, newReferenceDir ) {
+
+	const rotationQuat = new THREE.Quaternion()
+		.setFromUnitVectors( 
+			newReferenceDir, 
+			prevReferenceDir				     
+		);
+	camera.lookAt(
+		camera.getWorldDirection(new THREE.Vector3())
+			.applyQuaternion( rotationQuat )
+	);
 }
 
 export function zoomCamera( delta, centre ) {
@@ -112,7 +126,6 @@ function resizeRendererToDisplaySize( renderer ) {
     const aspect = canvas.width / canvas.height;
     camera.aspect = aspect;
     camera.fov = Math.min( 60 * Math.max( 1, 1/aspect ), 100 );
-    console.log(camera.fov)
     camera.updateProjectionMatrix();
 }
 
