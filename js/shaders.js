@@ -21,10 +21,11 @@ void main() {
 
 // =====================================================
 
+// === defs ===
+
 uniform float uTime;
 uniform vec2 uResolution;
 uniform float uZoom;
-uniform mat3 uSkyRotation;
 
 varying vec3 vNormal;
 
@@ -32,6 +33,8 @@ varying vec3 vNormal;
 #define UP vec3(0, 1, 0)
 #define DOWN vec3(0, -1, 0)
 
+
+// === utility functions ===
 
 float saturate( float x ) {
 	return clamp( x, 0., 1. );
@@ -77,6 +80,8 @@ vec3 hash33( vec3 p ) {
     return fract(sin(q)*43758.5453);
 }
 
+
+// === starlight functions ===
 
 vec3 dirToCellUV( vec3 dir,
 		float bandOffset, float cellOffset ) {
@@ -124,10 +129,38 @@ vec3 starFunction( vec3 celluv ) {
 	return saturate(vec3(
 		1. / length(celluv.xy)
            / pow(uZoom, 0.75)
-           * size * 0.01
+           * size * 0.004
 	       - .05
 	));
 }
+
+vec3 starLight( vec3 viewDir ) {
+
+    vec3 light = vec3(0);
+
+	for( float bo=-1.; bo<1.1; ++bo)
+	for( float co=-1.; co<1.1; ++co) {
+
+		vec3 celluv = dirToCellUV( viewDir, bo, co );
+		celluv.xy += hash12(celluv.z * 100.) - .5;
+
+		light += starFunction( celluv );
+	}
+
+    return light * vec3(1, 1, 1);
+}
+
+
+// === atmosphere functions ===
+
+vec3 atmosphereLight( vec3 viewDir ) {
+
+    return vec3(0.4, 0.7, 0.9);
+}
+
+
+
+// === main ===
 
 void main() {
 
@@ -135,15 +168,8 @@ void main() {
     
     gl_FragColor.a = 1.;
 	gl_FragColor.rgb = vec3(.1);
-
-	for( float bo=-1.; bo<1.1; ++bo)
-	for( float co=-1.; co<1.1; ++co) {
-		vec3 celluv = dirToCellUV( viewDir, bo, co );
-
-		celluv.xy += (hash12(celluv.z * 100.) - .5);
-
-		gl_FragColor.rgb += starFunction( celluv );
-	}
+    //gl_FragColor.rgb += starLight( viewDir );
+    gl_FragColor.rgb += atmosphereLight( viewDir );
 }
 
 // =====================================================
