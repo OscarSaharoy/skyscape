@@ -48,7 +48,6 @@ float hash11(float p) {
 }
 
 vec3 hash13(float p) {
-
 	vec3 p3 = fract(vec3(p) 
 			* vec3(.1031, .1030, .0973));
 	p3 += dot(p3, p3.yzx+33.33);
@@ -56,20 +55,17 @@ vec3 hash13(float p) {
 }
 
 float hash31(vec3 p3) {
-
 	p3  = fract(p3 * 1362.1031);
     p3 += dot(p3, p3.zyx + 31.32);
     return fract((p3.x + p3.y) * p3.z);
 }
 
 vec3 hash33( vec3 p ) {
-
     vec3 q = vec3( 
 		dot( p, vec3(127.1,311.7,432.2) ), 
 		dot( p, vec3(269.5,183.3,847.6) ), 
 		dot( p, vec3(419.2,371.9,927.0) )
 	);
-
     return fract(sin(q)*43758.5453);
 }
 
@@ -101,7 +97,7 @@ vec3 dirToCellUV( vec3 dir,
 
 	if(cellOffset < 0. && theta < cellLength)
 		cell += divisions * cellLength;
-	if(cellOffset > 0. && theta > 2.*PI - cellLength)
+    if(cellOffset > 0. && theta > 2.*PI - cellLength)
 		cell -= divisions * cellLength;
 
 	vec3 celluv = vec3(
@@ -115,10 +111,22 @@ vec3 dirToCellUV( vec3 dir,
 
 vec3 starFunction( vec3 celluv ) {
 
+    float size
+        = pow( celluv.z, 4. )
+        * pow(2. - celluv.z, -15.);
+    
+    size
+        = saturate(0.2*celluv.z - 0.05)
+        + saturate(20.*(celluv.z-1.)+1.);
+
+    size
+        = pow(celluv.z, 15.);
+
 	return saturate(vec3(
-		.01 / length(celluv.xy)
-			* pow(celluv.z, 15.)
-			- .05
+		1. / length(celluv.xy)
+           / pow(uZoom, 0.75)
+           * size * 0.01
+	       - .05
 	));
 }
 

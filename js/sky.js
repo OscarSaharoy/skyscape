@@ -9,7 +9,7 @@ const renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
 const dpr   = window.devicePixelRatio;
 //renderer.setPixelRatio(dpr);
 
-const up = new THREE.Vector3( 0, 1, 0 );
+const UP = new THREE.Vector3( 0, 1, 0 );
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color( 0x101050 );
@@ -69,16 +69,15 @@ const skyMaterial = new THREE.ShaderMaterial({
 }
 
 export function panCamera( delta ) {
-	return;
 
-    const right = new THREE.Vector3().crossVectors( cameraForward, up );
+    const right = new THREE.Vector3().crossVectors( cameraForward, UP );
     const over = new THREE.Vector3().crossVectors( cameraForward, right );
 
-    if( up.dot(cameraForward) > 0 && delta.y < 0
-     || up.dot(cameraForward) < 0 && delta.y > 0 )
+    if( UP.dot(cameraForward) > 0 && delta.y < 0
+     || UP.dot(cameraForward) < 0 && delta.y > 0 )
         over.normalize();
 
-    const sensitivity = -12 / (1.2*camera.zoom + 1.8);
+    const sensitivity = -9 / (camera.zoom + 2.);
     
     const adjust = new THREE.Vector3().addVectors(
         right.multiplyScalar(delta.x),
@@ -88,19 +87,6 @@ export function panCamera( delta ) {
     cameraForward.add( adjust );
     cameraForward.normalize();
     camera.lookAt( cameraForward );
-}
-
-export function rotateCamera( prevReferenceDir, newReferenceDir ) {
-
-	const rotationQuat = new THREE.Quaternion()
-		.setFromUnitVectors( 
-			newReferenceDir, 
-			prevReferenceDir				     
-		);
-	camera.lookAt(
-		camera.getWorldDirection(new THREE.Vector3())
-			.applyQuaternion( rotationQuat )
-	);
 }
 
 export function zoomCamera( delta, centre ) {
@@ -133,12 +119,10 @@ new ResizeObserver( () => resizeRendererToDisplaySize(renderer) ).observe( canva
 
 
 function render( time ) {
+    requestAnimationFrame(render);
 
     renderer.render(scene, camera);
-
-    //uniforms.uTime.value = time * 0.001;
-
-    requestAnimationFrame(render);
+    uniforms.uTime.value = time * 0.001;
 }
 
 requestAnimationFrame(render);
