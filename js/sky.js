@@ -57,6 +57,13 @@ const skyMaterial = new THREE.ShaderMaterial({
 }
 
 {
+    const geometry = new THREE.TorusKnotGeometry( 10, .2, 1000, 16, 2, 7 );
+	const material = new THREE.MeshBasicMaterial( { color: 0x00ddff } );
+    const knot = new THREE.Mesh( geometry, material );
+    //scene.add( knot );
+}
+
+{
     const loader = new GLTFLoader();
     
     loader.load(
