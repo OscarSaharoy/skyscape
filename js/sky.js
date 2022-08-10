@@ -1,5 +1,8 @@
 // Oscar Saharoy 2022
 
+window.onerror = error => console.log(error);
+
+
 import * as THREE from 'three'; 
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { skyVert, skyFrag } from "./shaders.js";
@@ -35,6 +38,7 @@ const skyUniforms = {
     uTime:        { value: 0. },
     uResolution:  { value: new THREE.Vector2() },
 	uZoom:        { value: 1. },
+	uSkyRotation: { value: new THREE.Matrix4() },
 };
 
 const skyMaterial = new THREE.ShaderMaterial({
@@ -127,6 +131,16 @@ new ResizeObserver( () => resizeRendererToDisplaySize(renderer) ).observe( canva
 
 function render( time ) {
     requestAnimationFrame(render);
+
+	const spinAxis = new THREE.Vector3(.6,.8,0);
+	const spinMatrix = 
+		new THREE.Matrix4().makeRotationAxis(
+			spinAxis, 0.016
+		);
+
+	skyUniforms.uSkyRotation.value.premultiply(
+		spinMatrix
+	);
 
     renderer.render(scene, camera);
     skyUniforms.uTime.value = time * 0.001;
