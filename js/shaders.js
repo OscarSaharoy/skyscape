@@ -38,6 +38,10 @@ varying vec3 vNormal;
 #define DOWN vec3(0, -1, 0)
 #define EARTH_CENTRE vec3(0)
 #define EARTH_RADIUS 6400000.
+#define SUN_DIST 151560000000. 
+#define SUN_RADIUS 696340000. 
+#define MOON_DIST 384400000. 
+#define MOON_RADIUS 1737400. 
 
 
 // === utility functions ===
@@ -262,7 +266,17 @@ vec3 starLight( vec3 viewDir ) {
 vec3 sunLight( vec3 viewDir ) {
 
 	vec3 light = vec3(0);
-	light += step(.996,dot(viewDir, uSunDir));
+
+	vec3 sunPos = uSunDir * SUN_DIST;
+
+	vec4 sunIntersect = intersectSphere(
+		vec3(0), viewDir, 
+		sunPos, SUN_RADIUS);
+
+	if( sunIntersect == vec4(0) ) return vec3(0);
+
+	light += 1.;
+
 	return light;
 }
 
@@ -271,16 +285,21 @@ vec3 sunLight( vec3 viewDir ) {
 
 vec3 moonLight( vec3 viewDir ) {
 
+	vec3 light = vec3(0);
+
+	vec3 moonPos = uMoonDir * MOON_DIST;
+
 	vec4 moonIntersect = intersectSphere(
-		vec3(0), viewDir, uMoonDir, .1);
+		vec3(0), viewDir, 
+		moonPos, MOON_RADIUS);
 
 	if( moonIntersect == vec4(0) ) return vec3(0);
 
-	float diffuse = saturate(dot(
-		normalize(moonIntersect.xyz - uMoonDir), 
+	light += saturate(dot(
+		normalize(moonIntersect.xyz - moonPos), 
 		uSunDir) * 4.);
 
-	return vec3(diffuse);
+	return light;
 }
 
 
@@ -289,6 +308,8 @@ vec3 moonLight( vec3 viewDir ) {
 vec3 atmosphereLight( vec3 viewDir ) {
 
 	vec3 light = vec3(0);
+
+
 
 	return light;
 }

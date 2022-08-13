@@ -74,7 +74,7 @@ const skyMaterial = new THREE.ShaderMaterial({
 
 {
     const loader = new GLTFLoader();
-    
+
     loader.load(
         "../city.glb",
         gltf => {
@@ -96,7 +96,7 @@ export function panCamera( delta ) {
         over.normalize();
 
     const sensitivity = -9 / (camera.zoom + 2.);
-    
+
     const adjust = new THREE.Vector3().addVectors(
         right.multiplyScalar(delta.x),
         over.multiplyScalar( delta.y)
