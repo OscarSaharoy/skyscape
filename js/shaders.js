@@ -27,6 +27,8 @@ uniform float uTime;
 uniform vec2 uResolution;
 uniform float uZoom;
 uniform mat4 uSkyRotation;
+uniform vec3 uSunDir;
+uniform vec3 uMoonDir;
 
 varying vec3 vNormal;
 
@@ -36,8 +38,6 @@ varying vec3 vNormal;
 #define DOWN vec3(0, -1, 0)
 #define EARTH_CENTRE vec3(0)
 #define EARTH_RADIUS 6400000.
-#define SUN_DIR vec3(0,0,-1)
-#define MOON_DIR vec3(0,0,1)
 
 
 // === utility functions ===
@@ -239,12 +239,16 @@ vec3 starFunction( vec3 celluv ) {
 
 vec3 starLight( vec3 viewDir ) {
 
+	vec3 rotatedView = 
+		(vec4(viewDir, 1.) * uSkyRotation).xyz;
+
     vec3 light = vec3(0);
 
 	for( float bo=-1.; bo<1.1; ++bo)
 	for( float co=-1.; co<1.1; ++co) {
 
-		vec3 celluv = dirToCellUV( viewDir, bo, co );
+		vec3 celluv = dirToCellUV( 
+			rotatedView, bo, co );
 		celluv.xy += hash12(celluv.z * 100.) - .5;
 
 		light += starFunction( celluv );
@@ -253,27 +257,30 @@ vec3 starLight( vec3 viewDir ) {
     return light * vec3(1, 1, 1);
 }
 
+// === sunlight ===
+
+vec3 sunLight( vec3 viewDir ) {
+
+	vec3 light = vec3(0);
+	light += step(.996,dot(viewDir, uSunDir));
+	return light;
+}
+
 
 // === moonlight ===
 
 vec3 moonLight( vec3 viewDir ) {
 
 	vec4 moonIntersect = intersectSphere(
-		vec3(0), viewDir, vec3(10), .4);
+		vec3(0), viewDir, uMoonDir, .1);
 
-	if(moonIntersect != vec4(0) ) {
+	if( moonIntersect == vec4(0) ) return vec3(0);
 
-		vec3 normal = normalize(
-			moonIntersect.xyz - vec3(10)
-		);
-		normal += simplex3d(normal * 2.) * 0.2;
-		normal += simplex3d(normal * 4.) * 0.1;
-		return saturate(vec3(
-			dot(normal, vec3(.9,-.3,0))
-		));
-	}
+	float diffuse = saturate(dot(
+		normalize(moonIntersect.xyz - uMoonDir), 
+		uSunDir) * 4.);
 
-	return vec3(0);
+	return vec3(diffuse);
 }
 
 
@@ -281,36 +288,11 @@ vec3 moonLight( vec3 viewDir ) {
 
 vec3 atmosphereLight( vec3 viewDir ) {
 
-	return vec3(0.5);
-
 	vec3 light = vec3(0);
-
-	vec4 intersectData = intersectSphere(
-		vec3(0,6400.,0), viewDir, 
-		vec3(0), 6500.
-	);
-
-	vec3 sphereIntersect = intersectData.xyz;
-	float distThroughSphere = intersectData.w;
-
-	float nSteps = 10.;
-	vec3 samplePoint = vec3(0);
-	for( float i = 0.; i < nSteps; ++i ) {
-
-		float fractionAlongRay = i / nSteps;
-		samplePoint = sphereIntersect + fractionAlongRay
-					* distThroughSphere * viewDir;
-		
-		float opticalDepth = intersectSphere(
-			samplePoint, SUN_DIR, 
-			vec3(0), 6500.
-		).w;
-	}
-
-	light += step(.996,dot(viewDir, SUN_DIR));
 
 	return light;
 }
+
 
 vec3 atmosphereNoise( vec3 viewDir ) {
 
@@ -328,12 +310,9 @@ void main() {
     
     gl_FragColor.a = 1.;
 	gl_FragColor.rgb = vec3(0.05);
-	vec3 spunViewDir = 
-		(uSkyRotation * vec4(viewDir,1.)).xyz;
-    gl_FragColor.rgb += 
-		starLight( spunViewDir );
-	gl_FragColor.rgb += 
-		moonLight( spunViewDir );
+    gl_FragColor.rgb += starLight( viewDir );
+	gl_FragColor.rgb += sunLight( viewDir );
+	gl_FragColor.rgb += moonLight( viewDir );
     //gl_FragColor.rgb += atmosphereLight( viewDir );
 	//gl_FragColor.rgb += atmosphereNoise( viewDir );
 }

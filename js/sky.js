@@ -1,7 +1,6 @@
 // Oscar Saharoy 2022
 
-window.onerror = error => console.log(error);
-
+window.onerror = error => alert(error);
 
 import * as THREE from 'three'; 
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -13,6 +12,10 @@ const dpr   = window.devicePixelRatio;
 //renderer.setPixelRatio(dpr);
 
 const UP = new THREE.Vector3( 0, 1, 0 );
+const NORTH = new THREE.Vector3(  1, 0,  0 );
+const SOUTH = new THREE.Vector3( -1, 0,  0 );
+const EAST  = new THREE.Vector3(  0, 0,  1 );
+const WEST  = new THREE.Vector3(  0, 0, -1 );
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color( 0x101050 );
@@ -39,6 +42,8 @@ const skyUniforms = {
     uResolution:  { value: new THREE.Vector2() },
 	uZoom:        { value: 1. },
 	uSkyRotation: { value: new THREE.Matrix4() },
+	uSunDir:      { value: new THREE.Vector3() },
+	uMoonDir:     { value: new THREE.Vector3() },
 };
 
 const skyMaterial = new THREE.ShaderMaterial({
@@ -81,8 +86,10 @@ const skyMaterial = new THREE.ShaderMaterial({
 
 export function panCamera( delta ) {
 
-    const right = new THREE.Vector3().crossVectors( cameraForward, UP );
-    const over = new THREE.Vector3().crossVectors( cameraForward, right );
+    const right = new THREE.Vector3()
+				.crossVectors( cameraForward, UP );
+    const over  = new THREE.Vector3()
+				.crossVectors( cameraForward, right );
 
     if( UP.dot(cameraForward) > 0 && delta.y < 0
      || UP.dot(cameraForward) < 0 && delta.y > 0 )
@@ -92,7 +99,7 @@ export function panCamera( delta ) {
     
     const adjust = new THREE.Vector3().addVectors(
         right.multiplyScalar(delta.x),
-        over.multiplyScalar(delta.y)
+        over.multiplyScalar( delta.y)
     ).multiplyScalar(sensitivity);
 
     cameraForward.add( adjust );
@@ -109,6 +116,44 @@ export function zoomCamera( delta, centre ) {
     camera.updateProjectionMatrix();
 
 	skyUniforms.uZoom.value = camera.zoom;
+}
+
+
+function setAstroUniforms( millis ) {
+
+	const days = millis / 8.64e+7;
+
+	const earthRotationAngle = days  * 2 * Math.PI;
+	const sunAngle      = days / 365 * 2 * Math.PI;
+	const moonAngle     = days / 27  * 2 * Math.PI;
+
+	const axialTilt      = 23.4 / 360 * 2 * Math.PI;
+	// from 0 at pole so not really latitude
+	const viewerLatitude = 39   / 360 * 2 * Math.PI;
+
+	const equatorialMoonDir = new THREE.Vector3(
+		Math.sin(moonAngle), 0, -Math.cos(moonAngle)
+	);
+	const eclipticSunDir = new THREE.Vector3(
+		Math.sin(sunAngle), 0, -Math.cos(sunAngle)
+	);
+
+	const eclipticToEquatorial = new THREE.Matrix4()
+		.makeRotationAxis( NORTH, axialTilt );
+	const equatorialSunDir = eclipticSunDir
+		.applyMatrix4( eclipticToEquatorial );
+
+	const earthSpinMatrix = new THREE.Matrix4()
+		.makeRotationAxis( UP, earthRotationAngle );
+	const latitudeRotationMatrix = new THREE.Matrix4()
+		.makeRotationAxis( NORTH, viewerLatitude );
+
+	skyUniforms.uSkyRotation.value = earthSpinMatrix
+		.premultiply( latitudeRotationMatrix );
+	skyUniforms.uSunDir.value = equatorialSunDir
+		.applyMatrix4( skyUniforms.uSkyRotation.value );
+	skyUniforms.uMoonDir.value = equatorialMoonDir
+		.applyMatrix4( skyUniforms.uSkyRotation.value );
 }
 
 
@@ -129,21 +174,12 @@ function resizeRendererToDisplaySize( renderer ) {
 new ResizeObserver( () => resizeRendererToDisplaySize(renderer) ).observe( canvas );
 
 
-function render( time ) {
+function render( millis ) {
     requestAnimationFrame(render);
 
-	const spinAxis = new THREE.Vector3(.6,.8,0);
-	const spinMatrix = 
-		new THREE.Matrix4().makeRotationAxis(
-			spinAxis, 0.016
-		);
-
-	skyUniforms.uSkyRotation.value.premultiply(
-		spinMatrix
-	);
-
     renderer.render(scene, camera);
-    skyUniforms.uTime.value = time * 0.001;
+    skyUniforms.uTime.value = millis * 0.001;
+	setAstroUniforms( millis + 1e+5 );
 }
 
 requestAnimationFrame(render);
@@ -153,8 +189,8 @@ function download() {
 
     const link = document.createElement("a");
     
-    link.href = renderer.domElement.toDataURL( "image/jpeg", 0.92 );
+    link.href = renderer.domElement
+		.toDataURL( "image/jpeg", 0.92 );
     link.download = "image.jpg";
     link.click();
 }
-
