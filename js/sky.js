@@ -78,7 +78,7 @@ const skyMaterial = new THREE.ShaderMaterial({
     loader.load(
         "../city.glb",
         gltf => {
-			scene.add( gltf.scene );
+			//scene.add( gltf.scene );
 			gltf.scene.position.y = -0.2;
 		}
     );
@@ -171,15 +171,18 @@ function resizeRendererToDisplaySize( renderer ) {
     camera.updateProjectionMatrix();
 }
 
-new ResizeObserver( () => resizeRendererToDisplaySize(renderer) ).observe( canvas );
+new ResizeObserver( 
+	() => resizeRendererToDisplaySize(renderer) 
+).observe( canvas );
 
 
 function render( millis ) {
     requestAnimationFrame(render);
 
-    renderer.render(scene, camera);
     skyUniforms.uTime.value = millis * 0.001;
 	setAstroUniforms( millis + 1e+5 );
+
+    renderer.render(scene, camera);
 }
 
 requestAnimationFrame(render);

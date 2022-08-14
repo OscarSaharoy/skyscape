@@ -36,12 +36,13 @@ varying vec3 vNormal;
 #define PHI 1.618033
 #define UP vec3(0, 1, 0)
 #define DOWN vec3(0, -1, 0)
-#define EARTH_CENTRE vec3(0)
-#define EARTH_RADIUS 6400000.
 #define SUN_DIST 151560000000. 
 #define SUN_RADIUS 696340000. 
 #define MOON_DIST 384400000. 
 #define MOON_RADIUS 1737400. 
+#define EARTH_RADIUS 6400000.
+#define EARTH_CENTRE vec3(0,-EARTH_RADIUS,0)
+#define ATMOSPHERE_RADIUS 6500000.
 
 
 // === utility functions ===
@@ -232,9 +233,10 @@ vec3 starFunction( vec3 celluv ) {
     float size = pow(celluv.z, 15.);
 	float twinkle = 
 		1. - pow( hash11(uTime + celluv.z), 27. );
+	vec2 jitter = hash12(celluv.z) * 2. - 1.;
 
 	return saturate(vec3(
-		1. / length(celluv.xy)
+		1. / length(celluv.xy + jitter)
            * size * 0.005 * twinkle
 	       - .06
 	)
@@ -309,7 +311,25 @@ vec3 atmosphereLight( vec3 viewDir ) {
 
 	vec3 light = vec3(0);
 
+	vec4 atmosphereIntersect = intersectSphere(
+		vec3(0), viewDir, 
+		EARTH_CENTRE, ATMOSPHERE_RADIUS
+	);
 
+	vec3 atmosphereExit = 
+		viewDir * atmosphereIntersect.w;
+
+	for(float i = 0.; i<10.; ++i) {
+
+		float fractionAlongRay = i / 10.;
+		vec3 samplePoint = 
+			viewDir * atmosphereIntersect.w 
+			* fractionAlongRay;
+		
+		
+	}
+
+	light += atmosphereExit * 0.00001;
 
 	return light;
 }
@@ -334,8 +354,8 @@ void main() {
     gl_FragColor.rgb += starLight( viewDir );
 	gl_FragColor.rgb += sunLight( viewDir );
 	gl_FragColor.rgb += moonLight( viewDir );
-    //gl_FragColor.rgb += atmosphereLight( viewDir );
-	//gl_FragColor.rgb += atmosphereNoise( viewDir );
+    gl_FragColor.rgb += atmosphereLight( viewDir );
+	gl_FragColor.rgb += atmosphereNoise( viewDir );
 }
 
 // =====================================================
