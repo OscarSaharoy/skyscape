@@ -2,8 +2,7 @@
 
 window.onerror = error => alert(error);
 
-import * as THREE from 'three'; 
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import * as THREE from './three.module.js'; 
 import { skyVert, skyFrag } from "./shaders.js";
 
 const canvas = document.querySelector( "#shader-canvas" );
@@ -70,18 +69,6 @@ const skyMaterial = new THREE.ShaderMaterial({
 	const material = new THREE.MeshBasicMaterial( { color: 0x00ddff } );
     const knot = new THREE.Mesh( geometry, material );
     //scene.add( knot );
-}
-
-{
-    const loader = new GLTFLoader();
-
-    loader.load(
-        "../city.glb",
-        gltf => {
-			//scene.add( gltf.scene );
-			gltf.scene.position.y = -0.2;
-		}
-    );
 }
 
 export function panCamera( delta ) {

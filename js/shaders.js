@@ -325,11 +325,9 @@ vec3 atmosphereLight( vec3 viewDir ) {
 		vec3 samplePoint = 
 			viewDir * atmosphereIntersect.w 
 			* fractionAlongRay;
-		
-		
 	}
 
-	light += atmosphereExit * 0.00001;
+	//light += atmosphereExit * 0.00001;
 
 	return light;
 }

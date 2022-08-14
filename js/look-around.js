@@ -1,6 +1,6 @@
 // Oscar Saharoy 2022
 
-import * as THREE from "https://unpkg.com/three@0.140.0/build/three.module.js"; 
+import * as THREE from "./three.module.js"; 
 import { camera, panCamera, zoomCamera } from "./sky.js";
 
 const canvas = document.querySelector( "#shader-canvas" );
