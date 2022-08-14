@@ -143,7 +143,7 @@ vec4 intersectSphere(vec3 rayOrigin, vec3 rayDir,
 	vec3 c  = sphereCentre;
 	float R = sphereRadius;
 
-	vec4 result = vec4(0);
+	vec4 result = vec4(0.0);
 
 	vec3 ro2c = c - ro;
 	float distToClosest = dot(rd, ro2c);
@@ -151,6 +151,9 @@ vec4 intersectSphere(vec3 rayOrigin, vec3 rayDir,
 	float centreToClosest = length(
 		closestPoint - sphereCentre
 	);
+
+    if( distToClosest > 0. )
+        result.xyz = closestPoint;
 
 	if( centreToClosest > R )
 		return result;
@@ -172,20 +175,6 @@ vec4 intersectSphere(vec3 rayOrigin, vec3 rayDir,
 
 	return result;
 }
-
-
-vec4 sphIntersect( 
-	vec3 ro, vec3 rd, vec3 sphc, float r ) {
-
-    vec3 oc = ro - sphc;
-    float b = dot( oc, rd );
-    float c = dot( oc, oc ) - r*r;
-    float h = b*b - c;
-    if( h<0.0 ) return vec4(0);
-    h = sqrt( h );
-    return vec4(ro+(-b - h)*rd, 2.*h);
-}
-
 
 // === starlight ===
 
@@ -275,7 +264,7 @@ vec3 sunLight( vec3 viewDir ) {
 		vec3(0), viewDir, 
 		sunPos, SUN_RADIUS);
 
-	if( sunIntersect == vec4(0) ) return vec3(0);
+	if( sunIntersect.w == 0.0 ) return vec3(0);
 
 	light += 1.;
 
@@ -295,11 +284,16 @@ vec3 moonLight( vec3 viewDir ) {
 		vec3(0), viewDir, 
 		moonPos, MOON_RADIUS);
 
-	if( moonIntersect == vec4(0) ) return vec3(0);
+	if( moonIntersect.w != 0.0 ) {
 
-	light += saturate(dot(
-		normalize(moonIntersect.xyz - moonPos), 
-		uSunDir) * 4.);
+        light += saturate(dot(
+            normalize(moonIntersect.xyz - moonPos), 
+            uSunDir) * 4.);
+    }
+    else if( moonIntersect.xyz != vec3(0) ) {
+
+        light.r += 1. - length(moonIntersect.xyz - moonPos) / MOON_RADIUS * 0.6;
+    }
 
 	return light;
 }
