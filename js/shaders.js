@@ -43,6 +43,7 @@ varying vec3 vNormal;
 #define EARTH_RADIUS 6400000.
 #define EARTH_CENTRE vec3(0,-EARTH_RADIUS,0)
 #define ATMOSPHERE_RADIUS 6500000.
+#define VIEWER_HEIGHT 2.
 
 
 // === utility functions ===
@@ -308,6 +309,9 @@ vec3 atmosphereLight( vec3 viewDir ) {
 
 	vec3 atmosphereExit = 
 		viewDir * atmosphereIntersect.w;
+    float distToEarth = -VIEWER_HEIGHT / dot(viewDir, UP);
+    distToEarth += step(distToEarth, 0.) * 1e+21;
+    float distThroughAtmosphere = min(atmosphereIntersect.w, distToEarth);
 
     float nSamples = 10.;
 	for(float i = 0.; i<nSamples; ++i) {
@@ -317,7 +321,8 @@ vec3 atmosphereLight( vec3 viewDir ) {
 			viewDir * atmosphereIntersect.w 
 			* fractionAlongRay;
 	}
-	return light;
+
+	return vec3(1. - exp(-distThroughAtmosphere * 1e-3)) * viewDir;
 }
 
 
@@ -330,15 +335,15 @@ vec3 atmosphereNoise( vec3 viewDir ) {
 
 // === ocean ===
 
-vec3 oceanLight( vec3 viewDir ) {
+vec3 oceanLight( vec3 viewDir, vec3 preLight ) {
 
-    float distToEarth = 2. / dot(viewDir, UP);
+    float distToEarth = VIEWER_HEIGHT / dot(viewDir, UP);
     vec3 earthIntersect = vec3(0) 
         + viewDir * distToEarth;
 
     vec3 intersectCube = floor(earthIntersect / 100.);
 
-    return vec3(hash31(intersectCube)) 
+    return (vec3(hash31(intersectCube)) - preLight) 
         * step(distToEarth, 0.);
 }
 
@@ -355,8 +360,8 @@ void main() {
 	//gl_FragColor.rgb += sunLight( viewDir );
 	//gl_FragColor.rgb += moonLight( viewDir );
     gl_FragColor.rgb += atmosphereLight( viewDir );
-	//gl_FragColor.rgb += atmosphereNoise( viewDir );
-    gl_FragColor.rgb += oceanLight( viewDir );
+	gl_FragColor.rgb += atmosphereNoise( viewDir );
+    //gl_FragColor.rgb += oceanLight( viewDir, gl_FragColor.xyz );
 }
 
 // =====================================================
