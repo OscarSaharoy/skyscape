@@ -5,8 +5,10 @@ window.onerror = error => alert(error);
 import * as THREE from './three.module.js'; 
 import { skyVert, skyFrag } from "./shaders.js";
 
-const canvas = document.querySelector( "#shader-canvas" );
-const renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
+const canvas = document.querySelector( 
+    "#shader-canvas" );
+const renderer = new THREE.WebGLRenderer(
+    {canvas: canvas, antialias: true});
 const dpr   = window.devicePixelRatio;
 //renderer.setPixelRatio(dpr);
 
@@ -20,20 +22,13 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color( 0xb01050 );
 
 const aspect = canvas.width / canvas.height;
-const fov = Math.min( 60 * Math.max( 1, 1/aspect ), 100 );
+const fov = Math.min( 
+    60 * Math.max( 1, 1/aspect ), 100 );
 const near = 0.1;
 const far = 30;
-export const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+export const camera = new THREE.PerspectiveCamera( 
+    fov, aspect, near, far );
 const cameraForward = new THREE.Vector3( 0, 0, -1 );
-
-{
-    const geometry = new THREE.PlaneGeometry( 100, 100 );
-    const material = new THREE.MeshBasicMaterial( {color: 0x000000} );
-    const plane = new THREE.Mesh( geometry, material );
-    plane.position.y = -0.2;
-    plane.rotateX( -Math.PI / 2);
-    //scene.add( plane );
-}
 
 
 const skyUniforms = {
@@ -54,22 +49,19 @@ const skyMaterial = new THREE.ShaderMaterial({
 
 
 {
-    const geometry = new THREE.IcosahedronGeometry( 1, 3 );
-    const material = skyMaterial; // new THREE.MeshBasicMaterial( { color: 0x0000ff, side: THREE.BackSide } );
+    const geometry = 
+        new THREE.IcosahedronGeometry( 1, 3 );
+    const material = skyMaterial; 
     const sphere = new THREE.Mesh( geometry, material );
     scene.add( sphere );
 
-    // render the sphere first and clear depth buffer straight after so it appears behind everything
+    // render the sphere first and clear depth buffer 
+    // // straight after so it appears behind everything
     sphere.renderOrder = -1;
-    sphere.onAfterRender = renderer => renderer.clearDepth();
+    sphere.onAfterRender = 
+        renderer => renderer.clearDepth();
 }
 
-{
-    const geometry = new THREE.TorusKnotGeometry( 10, .2, 1000, 16, 2, 7 );
-	const material = new THREE.MeshBasicMaterial( { color: 0x00ddff } );
-    const knot = new THREE.Mesh( geometry, material );
-    //scene.add( knot );
-}
 
 export function panCamera( delta ) {
 
@@ -150,11 +142,11 @@ function resizeRendererToDisplaySize( renderer ) {
     const height  = canvas.clientHeight;
 
     renderer.setSize( width*dpr, height*dpr, false );
-    //uniforms.uResolution.value.set( width * dpr, height * dpr );
 
     const aspect = canvas.width / canvas.height;
     camera.aspect = aspect;
-    camera.fov = Math.min( 60 * Math.max( 1, 1/aspect ), 100 );
+    camera.fov = Math.min( 
+        60 * Math.max( 1, 1/aspect ), 100 );
     camera.updateProjectionMatrix();
 }
 
