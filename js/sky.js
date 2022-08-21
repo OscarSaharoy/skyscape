@@ -17,7 +17,7 @@ const EAST  = new THREE.Vector3(  0, 0,  1 );
 const WEST  = new THREE.Vector3(  0, 0, -1 );
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color( 0x101050 );
+scene.background = new THREE.Color( 0xb01050 );
 
 const aspect = canvas.width / canvas.height;
 const fov = Math.min( 60 * Math.max( 1, 1/aspect ), 100 );
@@ -32,7 +32,7 @@ const cameraForward = new THREE.Vector3( 0, 0, -1 );
     const plane = new THREE.Mesh( geometry, material );
     plane.position.y = -0.2;
     plane.rotateX( -Math.PI / 2);
-    scene.add( plane );
+    //scene.add( plane );
 }
 
 

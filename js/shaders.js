@@ -221,13 +221,13 @@ vec3 starFunction( vec3 celluv ) {
 
     float size = pow(celluv.z, 15.);
 	float twinkle = 
-		1. - pow( hash11(uTime + celluv.z), 27. );
+		1. - hash11(uTime + celluv.z) * 0.2;
 	vec2 jitter = hash12(celluv.z) * 2. - 1.;
 
 	return saturate(vec3(
 		1. / length(celluv.xy + jitter)
-           * size * 0.005 * twinkle
-	       - .06
+           * size * 0.002 * twinkle
+	       - .001
 	)
 	/ pow(uZoom, 0.75));
 }
@@ -290,10 +290,6 @@ vec3 moonLight( vec3 viewDir ) {
             normalize(moonIntersect.xyz - moonPos), 
             uSunDir) * 4.);
     }
-    else if( moonIntersect.xyz != vec3(0) ) {
-
-        light.r += 1. - length(moonIntersect.xyz - moonPos) / MOON_RADIUS * 0.6;
-    }
 
 	return light;
 }
@@ -313,16 +309,14 @@ vec3 atmosphereLight( vec3 viewDir ) {
 	vec3 atmosphereExit = 
 		viewDir * atmosphereIntersect.w;
 
-	for(float i = 0.; i<10.; ++i) {
+    float nSamples = 10.;
+	for(float i = 0.; i<nSamples; ++i) {
 
-		float fractionAlongRay = i / 10.;
+		float fractionAlongRay = i / nSamples;
 		vec3 samplePoint = 
 			viewDir * atmosphereIntersect.w 
 			* fractionAlongRay;
 	}
-
-	//light += atmosphereExit * 0.00001;
-
 	return light;
 }
 
@@ -334,6 +328,20 @@ vec3 atmosphereNoise( vec3 viewDir ) {
 	);
 }
 
+// === ocean ===
+
+vec3 oceanLight( vec3 viewDir ) {
+
+    float distToEarth = 2. / dot(viewDir, UP);
+    vec3 earthIntersect = vec3(0) 
+        + viewDir * distToEarth;
+
+    vec3 intersectCube = floor(earthIntersect / 100.);
+
+    return vec3(hash31(intersectCube)) 
+        * step(distToEarth, 0.);
+}
+
 
 // === main ===
 
@@ -342,12 +350,13 @@ void main() {
     vec3 viewDir = normalize(vNormal);
     
     gl_FragColor.a = 1.;
-	gl_FragColor.rgb = vec3(0.05);
-    gl_FragColor.rgb += starLight( viewDir );
-	gl_FragColor.rgb += sunLight( viewDir );
-	gl_FragColor.rgb += moonLight( viewDir );
+	//gl_FragColor.rgb = vec3(0.05);
+    //gl_FragColor.rgb += starLight( viewDir );
+	//gl_FragColor.rgb += sunLight( viewDir );
+	//gl_FragColor.rgb += moonLight( viewDir );
     gl_FragColor.rgb += atmosphereLight( viewDir );
-	gl_FragColor.rgb += atmosphereNoise( viewDir );
+	//gl_FragColor.rgb += atmosphereNoise( viewDir );
+    gl_FragColor.rgb += oceanLight( viewDir );
 }
 
 // =====================================================
