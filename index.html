@@ -18,6 +18,7 @@
 
 	<!-- Import maps polyfill -->
 	<!-- Remove this when import maps will be widely supported -->
+    <!-- commented out while using local threejs
 	<script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
 	<script type="importmap">
 		{ "imports": {
@@ -25,10 +26,15 @@
 			"three/" : "https://unpkg.com/three@0.140.0/"
 		} }
 	</script>
+    -->
 
 	<script type="module" src="js/shaders.js"></script>
 	<script type="module" src="js/look-around.js"></script>
 	<script type="module" src="js/sky.js"></script>
+    <script type="module">
+        import * as THREE from "./js/three.module.js"; 
+        console.log(THREE);
+    </script>
 </body>
 
 </html>
