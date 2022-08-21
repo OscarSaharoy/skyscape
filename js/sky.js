@@ -2,7 +2,7 @@
 
 window.onerror = error => alert(error);
 
-import * as THREE from './three.module.js'; 
+import * as THREE from 'three'; 
 import { skyVert, skyFrag } from "./shaders.js";
 
 const canvas = document.querySelector( 
