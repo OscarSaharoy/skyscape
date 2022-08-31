@@ -159,7 +159,7 @@ function render( millis ) {
     requestAnimationFrame(render);
 
     skyUniforms.uTime.value = millis * 0.001;
-	setAstroUniforms( millis + 1e+5 );
+	setAstroUniforms( millis * 1e+4 );
 
     renderer.render(scene, camera);
 }

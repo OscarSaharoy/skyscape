@@ -136,7 +136,7 @@ float simplex3d(vec3 p) {
 	 return dot(d, vec4(52.0));
 }
 
-vec4 intersectSphere(vec3 rayOrigin, vec3 rayDir,
+vec4 intersectSphere( vec3 rayOrigin, vec3 rayDir,
 		vec3 sphereCentre, float sphereRadius ) {
 
 	vec3 ro = rayOrigin;
@@ -175,6 +175,37 @@ vec4 intersectSphere(vec3 rayOrigin, vec3 rayDir,
 	result.w = distThroughSphere;
 
 	return result;
+}
+
+float distToSphere( vec3 rayOrigin, vec3 rayDir,
+		vec3 sphereCentre, float sphereRadius ) { 
+
+	vec3 ro = rayOrigin;
+	vec3 rd = rayDir;
+	vec3 c  = sphereCentre;
+	float R = sphereRadius;
+
+	vec3 ro2c = c - ro;
+	float distToClosest = dot(rd, ro2c);
+
+    if( distToClosest < 0. )
+        return 0.;
+
+	vec3 closestPoint = ro + rd * distToClosest;
+	float centreToClosest = length(
+		closestPoint - sphereCentre
+	);
+
+	if( centreToClosest > R )
+		return 0.;
+	
+	float closestToIntersect = sqrt(
+		R*R - centreToClosest*centreToClosest
+	);
+	float distToSphere = 
+		distToClosest - closestToIntersect;
+
+    return distToSphere;
 }
 
 // === starlight ===
@@ -298,6 +329,83 @@ vec3 moonLight( vec3 viewDir ) {
 
 // === atmosphere ===
 
+float densityAtPoint( vec3 point ) {
+
+    float densityFalloff = 1.;
+    float densityMultiplier = 1e-5;
+
+    float heightAboveSurface = 
+        length(point - EARTH_CENTRE) - EARTH_RADIUS;
+    float height01 = heightAboveSurface 
+        / ( ATMOSPHERE_RADIUS - EARTH_RADIUS  );
+    float localDensity = densityMultiplier 
+        * exp(-height01 * densityFalloff) 
+        * (1. - height01);
+
+    return localDensity;
+}
+
+float opticalDepth( 
+        vec3 rayOrigin, vec3 rayDir, float rayLength ) {
+
+    int numOpticalDepthPoints = 10;
+
+    vec3 densitySamplePoint = rayOrigin;
+    float stepSize = rayLength 
+        / (float(numOpticalDepthPoints) - 1.);
+    float opticalDepth = 0.;
+
+    for( int i = 0; i < numOpticalDepthPoints; ++i ) {
+        float localDensity = 
+            densityAtPoint(densitySamplePoint);
+        opticalDepth += localDensity * stepSize;
+        densitySamplePoint += rayDir * stepSize;
+    }
+
+    return opticalDepth;
+}
+
+
+vec3 calculateLight( 
+        vec3 viewPos, vec3 viewDir, float rayLength ) {
+
+    int numInScatteringPoints = 10;
+
+    vec3 inScatteredLight = vec3(0.);
+    float stepSize = rayLength 
+        / float(numInScatteringPoints);
+    vec3 inScatterPoint = 
+        viewPos + 0.5 * stepSize * viewDir;
+
+    for( int i = 0; i < numInScatteringPoints; i++ ) {
+
+        float sunRayLength = intersectSphere( 
+            inScatterPoint, uSunDir, 
+            EARTH_CENTRE, ATMOSPHERE_RADIUS ).w;
+
+        float sunRayOpticalDepth = opticalDepth( 
+            inScatterPoint, uSunDir, sunRayLength );
+
+        float viewRayOpticalDepth = opticalDepth( 
+            inScatterPoint, -viewDir, 
+            stepSize * float(i) ); 
+
+        vec3 transmittance = exp( 
+            - (sunRayOpticalDepth + viewRayOpticalDepth) 
+            * vec3(1., 1., 1.)
+        );
+
+        float localDensity = 
+            densityAtPoint(inScatterPoint);
+
+        inScatteredLight += 
+            localDensity * transmittance * stepSize;
+        inScatterPoint += viewDir * stepSize;
+    }
+
+    return inScatteredLight;
+}
+
 vec3 atmosphereLight( vec3 viewDir ) {
 
 	vec3 light = vec3(0);
@@ -307,22 +415,20 @@ vec3 atmosphereLight( vec3 viewDir ) {
 		EARTH_CENTRE, ATMOSPHERE_RADIUS
 	);
 
-	vec3 atmosphereExit = 
-		viewDir * atmosphereIntersect.w;
-    float distToEarth = -VIEWER_HEIGHT / dot(viewDir, UP);
-    distToEarth += step(distToEarth, 0.) * 1e+21;
-    float distThroughAtmosphere = min(atmosphereIntersect.w, distToEarth);
+    //float distToEarth = distToSphere( 
+    //  vec3(0), viewDir, EARTH_CENTRE, EARTH_RADIUS );
+    float viewDotDown = dot( viewDir, DOWN );
+    float distThroughAtmosphere;
 
-    float nSamples = 10.;
-	for(float i = 0.; i<nSamples; ++i) {
+    if( viewDotDown < 1e-2 )
+        distThroughAtmosphere = atmosphereIntersect.w;
+    else 
+        distThroughAtmosphere = 
+            VIEWER_HEIGHT / dot( viewDir, DOWN );
+    
 
-		float fractionAlongRay = i / nSamples;
-		vec3 samplePoint = 
-			viewDir * atmosphereIntersect.w 
-			* fractionAlongRay;
-	}
-
-	return vec3(1. - exp(-distThroughAtmosphere * 1e-3)) * viewDir;
+    return calculateLight(
+        vec3(0), viewDir, distThroughAtmosphere);
 }
 
 
@@ -337,13 +443,14 @@ vec3 atmosphereNoise( vec3 viewDir ) {
 
 vec3 oceanLight( vec3 viewDir, vec3 preLight ) {
 
-    float distToEarth = VIEWER_HEIGHT / dot(viewDir, UP);
+    float distToEarth = 
+        VIEWER_HEIGHT / dot(viewDir, UP);
     vec3 earthIntersect = vec3(0) 
         + viewDir * distToEarth;
 
     vec3 intersectCube = floor(earthIntersect / 100.);
 
-    return (vec3(hash31(intersectCube)) - preLight) 
+    return vec3(hash31(intersectCube)) 
         * step(distToEarth, 0.);
 }
 
@@ -353,15 +460,19 @@ vec3 oceanLight( vec3 viewDir, vec3 preLight ) {
 void main() {
 
     vec3 viewDir = normalize(vNormal);
+    vec3 light = vec3(0);
     
+	//light = vec3(0.05);
+    //light += starLight( viewDir );
+	//light += sunLight( viewDir );
+	//light += moonLight( viewDir );
+    light += atmosphereLight( viewDir );
+	light += atmosphereNoise( viewDir );
+    //light += oceanLight( viewDir, light );
+    
+	light += sunLight( viewDir );
     gl_FragColor.a = 1.;
-	//gl_FragColor.rgb = vec3(0.05);
-    //gl_FragColor.rgb += starLight( viewDir );
-	//gl_FragColor.rgb += sunLight( viewDir );
-	//gl_FragColor.rgb += moonLight( viewDir );
-    gl_FragColor.rgb += atmosphereLight( viewDir );
-	gl_FragColor.rgb += atmosphereNoise( viewDir );
-    //gl_FragColor.rgb += oceanLight( viewDir, gl_FragColor.xyz );
+    gl_FragColor.rgb = light;
 }
 
 // =====================================================
