@@ -44,6 +44,9 @@ varying vec3 vNormal;
 #define EARTH_CENTRE vec3(0,-EARTH_RADIUS,0)
 #define ATMOSPHERE_RADIUS 6500000.
 #define VIEWER_HEIGHT 2.
+#define RGB_WAVELENGTHS vec3(700., 530., 440.)
+#define SCATTERING_COEFFS \
+    pow(vec3(400.) / RGB_WAVELENGTHS, vec3(4.))
 
 
 // === utility functions ===
@@ -392,14 +395,14 @@ vec3 calculateLight(
 
         vec3 transmittance = exp( 
             - (sunRayOpticalDepth + viewRayOpticalDepth) 
-            * vec3(1., 1., 1.)
+            * SCATTERING_COEFFS
         );
 
         float localDensity = 
             densityAtPoint(inScatterPoint);
 
-        inScatteredLight += 
-            localDensity * transmittance * stepSize;
+        inScatteredLight += localDensity 
+            * transmittance * stepSize * SCATTERING_COEFFS;
         inScatterPoint += viewDir * stepSize;
     }
 
@@ -471,6 +474,7 @@ void main() {
     //light += oceanLight( viewDir, light );
     
 	light += sunLight( viewDir );
+
     gl_FragColor.a = 1.;
     gl_FragColor.rgb = light;
 }
