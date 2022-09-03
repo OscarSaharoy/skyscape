@@ -63,6 +63,12 @@ const skyMaterial = new THREE.ShaderMaterial({
 }
 
 
+let timePaused = false;
+const toggleTimePausedOnSpace = 
+    event => timePaused ^= (event.code === "Space");
+document.addEventListener("keydown", toggleTimePausedOnSpace);
+
+
 export function panCamera( delta ) {
 
     const right = new THREE.Vector3()
@@ -155,16 +161,18 @@ new ResizeObserver(
 ).observe( canvas );
 
 
-function render( millis ) {
-    requestAnimationFrame(render);
+function render( millis, lastMillis ) {
+    requestAnimationFrame( 
+        newMillis => render(newMillis, millis) );
 
-    skyUniforms.uTime.value = millis * 0.001;
-	setAstroUniforms( millis * 1e+4 );
+    const newuTime = skyUniforms.uTime.value 
+        + (millis - lastMillis) * 0.001 * !timePaused;
+    skyUniforms.uTime.value = newuTime;
+	setAstroUniforms( newuTime * 1e+7 );
 
     renderer.render(scene, camera);
 }
-
-requestAnimationFrame(render);
+render(0, 0);
 
 
 function download() {

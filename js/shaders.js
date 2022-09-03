@@ -39,14 +39,18 @@ varying vec3 vNormal;
 #define SUN_DIST 151560000000. 
 #define SUN_RADIUS 696340000. 
 #define MOON_DIST 384400000. 
-#define MOON_RADIUS 1737400. 
-#define EARTH_RADIUS 6400000.
+#define MOON_RADIUS 1737e+3 
+#define EARTH_RADIUS 6460e+3
 #define EARTH_CENTRE vec3(0,-EARTH_RADIUS,0)
-#define ATMOSPHERE_RADIUS 6500000.
+#define ATMOSPHERE_RADIUS 6560e+3
 #define VIEWER_HEIGHT 2.
-#define RGB_WAVELENGTHS vec3(700., 530., 440.)
-#define SCATTERING_COEFFS \
-    pow(vec3(400.) / RGB_WAVELENGTHS, vec3(4.))
+
+#define RAYLEIGH_SCATTERING_COEFFS vec3(5.802, 13.558, 33.1) * 1e-6
+#define RAYLEIGH_ABSOPTION_COEFFS  vec3(0.)                  * 1e-6
+#define MIE_SCATTERING_COEFFS      vec3(3.996)               * 1e-6
+#define MIE_ABSOPTION_COEFFS       vec3(4.40)                * 1e-6
+#define OZONE_SCATTERING_COEFFS    vec3(0)                   * 1e-6
+#define OZONE_ABSOPTION_COEFFS     vec3(0.65, 1.881, 0.085)  * 1e-6
 
 
 // === utility functions ===
@@ -335,7 +339,7 @@ vec3 moonLight( vec3 viewDir ) {
 float densityAtPoint( vec3 point ) {
 
     float densityFalloff = 1.;
-    float densityMultiplier = 1e-5;
+    float densityMultiplier = 6e-7;
 
     float heightAboveSurface = 
         length(point - EARTH_CENTRE) - EARTH_RADIUS;
@@ -345,23 +349,36 @@ float densityAtPoint( vec3 point ) {
         * exp(-height01 * densityFalloff) 
         * (1. - height01);
 
-    return localDensity;
+    return exp( - heightAboveSurface / 8000. );
 }
 
-float opticalDepth( 
+vec3 extinction( vec3 point ) {
+
+    float heightAboveSurface = 
+        length(point - EARTH_CENTRE) - EARTH_RADIUS;
+
+    float rayleighDensity = exp( - heightAboveSurface / 8000. );
+    float mieDensity = exp( -heightAboveSurface / 1200. );
+    float ozoneDensity = max(0., 1. - abs(heightAboveSurface - 25e+3) / 15e+3 );
+
+    return rayleighDensity * ( RAYLEIGH_SCATTERING_COEFFS + RAYLEIGH_ABSOPTION_COEFFS )
+        + mieDensity * ( MIE_SCATTERING_COEFFS + MIE_ABSOPTION_COEFFS )
+        + ozoneDensity * ( OZONE_SCATTERING_COEFFS + OZONE_ABSOPTION_COEFFS );
+}
+
+vec3 opticalDepth( 
         vec3 rayOrigin, vec3 rayDir, float rayLength ) {
 
     int numOpticalDepthPoints = 10;
 
-    vec3 densitySamplePoint = rayOrigin;
+    vec3 opticalDepth = vec3(0.);
     float stepSize = rayLength 
-        / (float(numOpticalDepthPoints) - 1.);
-    float opticalDepth = 0.;
+        / float(numOpticalDepthPoints);
+    vec3 densitySamplePoint = 
+        rayOrigin + 0.5 * stepSize * rayDir;
 
     for( int i = 0; i < numOpticalDepthPoints; ++i ) {
-        float localDensity = 
-            densityAtPoint(densitySamplePoint);
-        opticalDepth += localDensity * stepSize;
+        opticalDepth += extinction(densitySamplePoint) * stepSize;
         densitySamplePoint += rayDir * stepSize;
     }
 
@@ -386,23 +403,32 @@ vec3 calculateLight(
             inScatterPoint, uSunDir, 
             EARTH_CENTRE, ATMOSPHERE_RADIUS ).w;
 
-        float sunRayOpticalDepth = opticalDepth( 
+        vec3 sunRayOpticalDepth = opticalDepth( 
             inScatterPoint, uSunDir, sunRayLength );
 
-        float viewRayOpticalDepth = opticalDepth( 
+        vec3 viewRayOpticalDepth = opticalDepth( 
             inScatterPoint, -viewDir, 
             stepSize * float(i) ); 
 
         vec3 transmittance = exp( 
             - (sunRayOpticalDepth + viewRayOpticalDepth) 
-            * SCATTERING_COEFFS
         );
 
-        float localDensity = 
-            densityAtPoint(inScatterPoint);
+        float heightAboveSurface = 
+            length(inScatterPoint - EARTH_CENTRE) - EARTH_RADIUS;
+        float cosTheta = dot(viewDir, uSunDir);
 
-        inScatteredLight += localDensity 
-            * transmittance * stepSize * SCATTERING_COEFFS;
+        float rayleighDensity = exp( - heightAboveSurface / 8000. );
+        float rayleighPhase = 3. / (16. * PI) * ( 1. + cosTheta*cosTheta );
+
+        float mieDensity = exp( -heightAboveSurface / 1200. );
+        float g = .7;
+        float miePhase = 3. / (8.*PI) * (1. - g*g) * (1. + cosTheta*cosTheta) / (1. + g*g) / pow((1. + g*g - 2.*g*cosTheta), 1.5);
+
+        inScatteredLight += transmittance * stepSize * (
+            RAYLEIGH_SCATTERING_COEFFS * rayleighDensity * rayleighPhase
+            + MIE_SCATTERING_COEFFS * mieDensity * miePhase
+        );
         inScatterPoint += viewDir * stepSize;
     }
 
