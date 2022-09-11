@@ -3,7 +3,8 @@
 window.onerror = error => alert(error);
 
 import * as THREE from './three.module.js'; 
-import { skyVert, skyFrag } from "./shaders.js";
+import skyVertexShader from "./skyVertex.glsl.js";
+import skyFragmentShader from "./skyFragment.glsl.js";
 
 const canvas = document.querySelector( 
     "#shader-canvas" );
@@ -41,8 +42,8 @@ const skyUniforms = {
 };
 
 const skyMaterial = new THREE.ShaderMaterial({
-    vertexShader: skyVert,
-    fragmentShader: skyFrag,
+    vertexShader: skyVertexShader,
+    fragmentShader: skyFragmentShader,
     uniforms: skyUniforms,
     side: THREE.BackSide
 });
@@ -56,7 +57,7 @@ const skyMaterial = new THREE.ShaderMaterial({
     scene.add( sphere );
 
     // render the sphere first and clear depth buffer 
-    // // straight after so it appears behind everything
+    // straight after so it appears behind everything
     sphere.renderOrder = -1;
     sphere.onAfterRender = 
         renderer => renderer.clearDepth();
