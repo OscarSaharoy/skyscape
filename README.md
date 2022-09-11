@@ -1,3 +1,3 @@
-# shadertoy
+# skies
 
-web shader template
+skies
