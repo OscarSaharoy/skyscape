@@ -1,36 +1,31 @@
 // Oscar Saharoy 2022
 
+
+// mie funcs
+//float mieDensity = exp( -heightAboveSurface / 1200. );
+//float g = .7;
+//float miePhase = 3. / (8.*PI) * (1. - g*g) * (1. + cosTheta*cosTheta) / (1. + g*g) / pow((1. + g*g - 2.*g*cosTheta), 1.5);
+
 export default `
 
-
-float densityAtPoint( vec3 point ) {
-
-    float densityFalloff = 1.;
-    float densityMultiplier = 6e-7;
-
-    float heightAboveSurface = 
-        length(point - EARTH_CENTRE) - EARTH_RADIUS;
-    float height01 = heightAboveSurface 
-        / ( ATMOSPHERE_RADIUS - EARTH_RADIUS  );
-    float localDensity = densityMultiplier 
-        * exp(-height01 * densityFalloff) 
-        * (1. - height01);
-
-    return exp( - heightAboveSurface / 8000. );
-}
 
 vec3 extinction( vec3 point ) {
 
     float heightAboveSurface = 
         length(point - EARTH_CENTRE) - EARTH_RADIUS;
 
-    float rayleighDensity = exp( - heightAboveSurface / 8000. );
-    float mieDensity = exp( -heightAboveSurface / 1200. );
-    float ozoneDensity = max(0., 1. - abs(heightAboveSurface - 25e+3) / 15e+3 );
+    float rayleighDensity = 
+        exp( - heightAboveSurface / 8000. );
+    float mieDensity = 
+        exp( -heightAboveSurface / 1200. );
+    float ozoneDensity = 
+        max(0., 
+            1. - abs(heightAboveSurface - 25e+3) 
+                / 15e+3 );
 
-    return rayleighDensity * ( RAYLEIGH_SCATTERING_COEFFS + RAYLEIGH_ABSOPTION_COEFFS )
-        + mieDensity * ( MIE_SCATTERING_COEFFS + MIE_ABSOPTION_COEFFS )
-        + ozoneDensity * ( OZONE_SCATTERING_COEFFS + OZONE_ABSOPTION_COEFFS );
+    return rayleighDensity * ( RAYLEIGH_SCATTERING_COEFFS + RAYLEIGH_ABSORPTION_COEFFS );
+        //+ mieDensity * ( MIE_SCATTERING_COEFFS + MIE_ABSORPTION_COEFFS )
+        //+ ozoneDensity * ( OZONE_SCATTERING_COEFFS + OZONE_ABSORPTION_COEFFS );
 }
 
 vec3 opticalDepth( 
@@ -45,11 +40,47 @@ vec3 opticalDepth(
         rayOrigin + 0.5 * stepSize * rayDir;
 
     for( int i = 0; i < numOpticalDepthPoints; ++i ) {
-        opticalDepth += extinction(densitySamplePoint) * stepSize;
+        opticalDepth += 
+            extinction(densitySamplePoint) * stepSize;
         densitySamplePoint += rayDir * stepSize;
     }
 
     return opticalDepth;
+}
+
+
+vec3 inScatteredLightAtPoint( 
+        vec3 point, vec3 viewDir, vec3 viewPos ) {
+
+    float sunRayLength = intersectSphere( 
+        point, uSunDir, 
+        EARTH_CENTRE, ATMOSPHERE_RADIUS ).w;
+
+    vec3 sunRayOpticalDepth = opticalDepth( 
+        point, uSunDir, sunRayLength );
+
+    vec3 viewRayOpticalDepth = opticalDepth( 
+        point, -viewDir, length(point-viewPos) ); 
+
+    vec3 transmittance = exp( 
+        - (sunRayOpticalDepth + viewRayOpticalDepth) 
+    );
+
+    float heightAboveSurface = 
+        length(point - EARTH_CENTRE) - EARTH_RADIUS;
+    float rayleighDensity = 
+        exp( - heightAboveSurface / 8000. );
+
+    float cosTheta = dot(viewDir, uSunDir);
+    float rayleighPhase = 
+        3. / (16. * PI) * ( 1. + cosTheta*cosTheta );
+
+    return  transmittance * (
+        RAYLEIGH_SCATTERING_COEFFS 
+        * rayleighDensity * rayleighPhase
+        //+ MIE_SCATTERING_COEFFS 
+        //* mieDensity * miePhase
+    );
 }
 
 
@@ -66,41 +97,15 @@ vec3 calculateLight(
 
     for( int i = 0; i < numInScatteringPoints; i++ ) {
 
-        float sunRayLength = intersectSphere( 
-            inScatterPoint, uSunDir, 
-            EARTH_CENTRE, ATMOSPHERE_RADIUS ).w;
-
-        vec3 sunRayOpticalDepth = opticalDepth( 
-            inScatterPoint, uSunDir, sunRayLength );
-
-        vec3 viewRayOpticalDepth = opticalDepth( 
-            inScatterPoint, -viewDir, 
-            stepSize * float(i) ); 
-
-        vec3 transmittance = exp( 
-            - (sunRayOpticalDepth + viewRayOpticalDepth) 
-        );
-
-        float heightAboveSurface = 
-            length(inScatterPoint - EARTH_CENTRE) - EARTH_RADIUS;
-        float cosTheta = dot(viewDir, uSunDir);
-
-        float rayleighDensity = exp( - heightAboveSurface / 8000. );
-        float rayleighPhase = 3. / (16. * PI) * ( 1. + cosTheta*cosTheta );
-
-        float mieDensity = exp( -heightAboveSurface / 1200. );
-        float g = .7;
-        float miePhase = 3. / (8.*PI) * (1. - g*g) * (1. + cosTheta*cosTheta) / (1. + g*g) / pow((1. + g*g - 2.*g*cosTheta), 1.5);
-
-        inScatteredLight += transmittance * stepSize * (
-            RAYLEIGH_SCATTERING_COEFFS * rayleighDensity * rayleighPhase
-            + MIE_SCATTERING_COEFFS * mieDensity * miePhase
-        );
+        inScatteredLight += inScatteredLightAtPoint(
+            inScatterPoint, viewDir, 
+            viewPos) * stepSize * 10.;
         inScatterPoint += viewDir * stepSize;
     }
 
     return inScatteredLight;
 }
+
 
 vec3 atmosphereLight( vec3 viewDir ) {
 
@@ -110,7 +115,8 @@ vec3 atmosphereLight( vec3 viewDir ) {
 	).w;
 
     if( viewDir.y < -1e-2 )
-        distThroughAtmosphere = VIEWER_HEIGHT / -viewDir.y;
+        distThroughAtmosphere = 
+            VIEWER_HEIGHT / -viewDir.y;
 
     return calculateLight(
         vec3(0), viewDir, distThroughAtmosphere);

@@ -25,10 +25,10 @@ varying vec3 vNormal;
 #define VIEWER_HEIGHT 2.
 
 #define RAYLEIGH_SCATTERING_COEFFS vec3(5.802, 13.558, 33.1) * 1e-6
-#define RAYLEIGH_ABSOPTION_COEFFS  vec3(0.)                  * 1e-6
+#define RAYLEIGH_ABSORPTION_COEFFS vec3(0.)                  * 1e-6
 #define MIE_SCATTERING_COEFFS      vec3(3.996)               * 1e-6
-#define MIE_ABSOPTION_COEFFS       vec3(4.40)                * 1e-6
+#define MIE_ABSORPTION_COEFFS      vec3(4.40)                * 1e-6
 #define OZONE_SCATTERING_COEFFS    vec3(0)                   * 1e-6
-#define OZONE_ABSOPTION_COEFFS     vec3(0.65, 1.881, 0.085)  * 1e-6
+#define OZONE_ABSORPTION_COEFFS    vec3(0.65, 1.881, 0.085)  * 1e-6
 
 `;
