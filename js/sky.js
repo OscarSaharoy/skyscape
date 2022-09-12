@@ -3,8 +3,8 @@
 window.onerror = error => alert(error);
 
 import * as THREE from './three.module.js'; 
-import skyVertexShader from "./skyVertex.glsl.js";
-import skyFragmentShader from "./skyFragment.glsl.js";
+import skyVertexShader from "../glsl/skyVertex.glsl.js";
+import skyFragmentShader from "../glsl/skyFragment.glsl.js";
 
 const canvas = document.querySelector( 
     "#shader-canvas" );
