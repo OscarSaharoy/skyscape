@@ -2,6 +2,7 @@
 
 export default `
 
+
 float densityAtPoint( vec3 point ) {
 
     float densityFalloff = 1.;
@@ -103,24 +104,13 @@ vec3 calculateLight(
 
 vec3 atmosphereLight( vec3 viewDir ) {
 
-	vec3 light = vec3(0);
-
-	vec4 atmosphereIntersect = intersectSphere(
+	float distThroughAtmosphere = intersectSphere(
 		vec3(0), viewDir, 
 		EARTH_CENTRE, ATMOSPHERE_RADIUS
-	);
+	).w;
 
-    //float distToEarth = distToSphere( 
-    //  vec3(0), viewDir, EARTH_CENTRE, EARTH_RADIUS );
-    float viewDotDown = dot( viewDir, DOWN );
-    float distThroughAtmosphere;
-
-    if( viewDotDown < 1e-2 )
-        distThroughAtmosphere = atmosphereIntersect.w;
-    else 
-        distThroughAtmosphere = 
-            VIEWER_HEIGHT / dot( viewDir, DOWN );
-    
+    if( viewDir.y < -1e-2 )
+        distThroughAtmosphere = VIEWER_HEIGHT / -viewDir.y;
 
     return calculateLight(
         vec3(0), viewDir, distThroughAtmosphere);
