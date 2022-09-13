@@ -1,6 +1,6 @@
 // Oscar Saharoy 2022
 
-window.onerror = error => alert(error);
+//window.onerror = error => alert(error);
 
 import * as THREE from './three.module.js'; 
 import skyVertexShader from "../glsl/skyVertex.glsl.js";

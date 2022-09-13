@@ -32,10 +32,42 @@ body, html {
     grid-column: 1;
     z-index: 0;
     pointer-events: none;
+    mix-blend-mode: difference;
 }
 
 #hud-svg circle {
     fill: transparent;
     stroke: white;
-    stroke-width: 0.002;
+    stroke-width: 0.006;
+    stroke-dasharray: 0.151;
+}
+#hud-svg circle.show {
+    animation: show 0.7s ease-in-out forwards;
+}
+#hud-svg circle.hide {
+    animation: hide 0.25s ease forwards;
+}
+@keyframes show {
+    from {
+        opacity: 1;
+        stroke-width: 0.006;
+        transform: rotate(90deg);
+        stroke-dashoffset: 0.151;
+    }
+    to {
+        opacity: 1;
+        stroke-width: 0.006;
+        transform: rotate(270deg);
+        stroke-dashoffset: 0;
+    }
+}
+@keyframes hide {
+    from {
+        opacity: 1;
+        stroke-width: 0.006;
+    }
+    to {
+        opacity: 0;
+        stroke-width: 0.002;
+    }
 }

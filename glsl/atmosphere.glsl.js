@@ -88,10 +88,9 @@ vec3 calculateLight(
         vec3 viewPos, vec3 viewDir, float rayLength ) {
 
     int numInScatteringPoints = 10;
-
     vec3 inScatteredLight = vec3(0.);
-    float stepSize = rayLength 
-        / float(numInScatteringPoints);
+    float stepSize = 
+        rayLength / float(numInScatteringPoints);
     vec3 inScatterPoint = 
         viewPos + 0.5 * stepSize * viewDir;
 
@@ -100,6 +99,7 @@ vec3 calculateLight(
         inScatteredLight += inScatteredLightAtPoint(
             inScatterPoint, viewDir, 
             viewPos) * stepSize * 10.;
+
         inScatterPoint += viewDir * stepSize;
     }
 
