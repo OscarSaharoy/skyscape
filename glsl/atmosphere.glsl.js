@@ -9,6 +9,35 @@
 export default `
 
 
+float rayleighDensityRatio( vec3 point ) {
+    
+    float lengthScale = 7994.;
+
+    float heightAboveSurface = 
+        length(point - EARTH_CENTRE) - EARTH_RADIUS;
+
+    return exp( - heightAboveSurface / lengthScale );
+}
+
+float mieDensityRatio( vec3 point ) {
+    
+    float lengthScale = 1200.;
+
+    float heightAboveSurface = 
+        length(point - EARTH_CENTRE) - EARTH_RADIUS;
+
+    return exp( - heightAboveSurface / lengthScale );
+}
+
+float ozoneDensityRatio( vec3 point ) {
+
+    float heightAboveSurface = 
+        length(point - EARTH_CENTRE) - EARTH_RADIUS;
+
+    return max(0., 1. - abs(heightAboveSurface - 25e+3) / 15e+3 );
+}
+
+
 vec3 extinction( vec3 point ) {
 
     float heightAboveSurface = 
@@ -72,7 +101,7 @@ vec3 inScatteredLightAtPoint(
         exp( - heightAboveSurface / 8000. );
 
     float cosTheta = dot(viewDir, uSunDir);
-    float rayleighPhase = 
+    float rayleighPhase = 1.; 
         3. / (16. * PI) * ( 1. + cosTheta*cosTheta );
 
     return  transmittance * (
@@ -97,8 +126,8 @@ vec3 calculateLight(
     for( int i = 0; i < numInScatteringPoints; i++ ) {
 
         inScatteredLight += inScatteredLightAtPoint(
-            inScatterPoint, viewDir, 
-            viewPos) * stepSize * 10.;
+            inScatterPoint, viewDir, viewPos) 
+            * stepSize;
 
         inScatterPoint += viewDir * stepSize;
     }
