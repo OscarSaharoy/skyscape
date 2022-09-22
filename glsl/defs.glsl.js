@@ -29,6 +29,6 @@ varying vec3 vNormal;
 #define MIE_SCATTERING_COEFFS      vec3(3.996)               * 1e-6
 #define MIE_ABSORPTION_COEFFS      vec3(4.40)                * 1e-6
 #define OZONE_SCATTERING_COEFFS    vec3(0)                   * 1e-6
-#define OZONE_ABSORPTION_COEFFS    vec3(0.65, 1.881, 0.085)  * 1e-6
+#define OZONE_ABSORPTION_COEFFS    vec3(1.285, 1.081, 0.085)  * 1e-6
 
 `;

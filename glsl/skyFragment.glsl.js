@@ -24,7 +24,7 @@ void main() {
 
     vec3 viewDir = normalize(vNormal);
     vec3 light = vec3(0);
-    
+
 	//light = vec3(0.05);
     //light += starLight( viewDir );
 	//light += sunLight( viewDir );
@@ -36,7 +36,7 @@ void main() {
 	light += sunLight( viewDir );
 
     gl_FragColor.a = 1.;
-    gl_FragColor.rgb = light;
+    gl_FragColor.rgb = pow(light , vec3(1. / 2.2));
 }
 
 `;

@@ -30,6 +30,7 @@ const far = 30;
 export const camera = new THREE.PerspectiveCamera( 
     fov, aspect, near, far );
 const cameraForward = new THREE.Vector3( 0, 0, -1 );
+camera.lookAt( cameraForward );
 
 
 const skyUniforms = {
@@ -149,6 +150,8 @@ function resizeRendererToDisplaySize( renderer ) {
     const height  = canvas.clientHeight;
 
     renderer.setSize( width*dpr, height*dpr, false );
+    skyUniforms.uResolution.value.set(
+        width*dpr, height*dpr );
 
     const aspect = canvas.width / canvas.height;
     camera.aspect = aspect;
@@ -173,7 +176,13 @@ function render( millis, lastMillis ) {
 
     renderer.render(scene, camera);
 }
-render(0, 0);
+//render(0, 0);
+
+setAstroUniforms(0);
+skyUniforms.uSunDir.value.set(0, -0.08, -1).normalize();
+window.addEventListener("DOMContentLoaded",
+    () => setTimeout( () => renderer.render(scene, camera), 0 )
+);
 
 
 function download() {
