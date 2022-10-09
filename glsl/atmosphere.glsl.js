@@ -85,17 +85,10 @@ vec3 inScatteredLightAtPoint(
     float cosTheta = dot(viewDir, uSunDir);
     float rayleighPhase = 
         3. / 4. * ( 1. + cosTheta*cosTheta );
-    float g = -0.1;
+    float g = 1.;
     float miePhase = 
-        //3. / 2. * 
-        //(1. - g*g) * (1. + cosTheta*cosTheta) / 
-        //(1. + g*g) / 
-        //pow((1. + g*g - 2.*g*cosTheta), 1.5);
-        (1.-g)*(1.-g) / 
-        //(4.*PI*
-        (
-         pow(1. + g*g - 2.*g*cosTheta, 1.5)
-        );
+        (1.-g)*(1.-g) /
+        ( pow(1. + g*g - 2.*g*cosTheta, 1.5) );
 
 
     return transmittance * (

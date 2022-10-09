@@ -13,7 +13,7 @@ const renderer = new THREE.WebGLRenderer(
 const dpr   = window.devicePixelRatio;
 //renderer.setPixelRatio(dpr);
 
-const UP = new THREE.Vector3( 0, 1, 0 );
+const UP    = new THREE.Vector3( 0, 1, 0 );
 const NORTH = new THREE.Vector3(  1, 0,  0 );
 const SOUTH = new THREE.Vector3( -1, 0,  0 );
 const EAST  = new THREE.Vector3(  0, 0,  1 );
@@ -65,12 +65,6 @@ const skyMaterial = new THREE.ShaderMaterial({
 }
 
 
-let timePaused = false;
-const toggleTimePausedOnSpace = 
-    event => timePaused ^= (event.code === "Space");
-document.addEventListener("keydown", toggleTimePausedOnSpace);
-
-
 export function panCamera( delta ) {
 
     const right = new THREE.Vector3()
@@ -92,6 +86,8 @@ export function panCamera( delta ) {
     cameraForward.add( adjust );
     cameraForward.normalize();
     camera.lookAt( cameraForward );
+
+	renderer.render(scene, camera);
 }
 
 export function zoomCamera( delta, centre ) {
@@ -103,44 +99,6 @@ export function zoomCamera( delta, centre ) {
     camera.updateProjectionMatrix();
 
 	skyUniforms.uZoom.value = camera.zoom;
-}
-
-
-function setAstroUniforms( millis ) {
-
-	const days = millis / 8.64e+7;
-
-	const earthRotationAngle = days  * 2 * Math.PI;
-	const sunAngle      = days / 365 * 2 * Math.PI;
-	const moonAngle     = days / 27  * 2 * Math.PI;
-
-	const axialTilt      = 23.4 / 360 * 2 * Math.PI;
-	// from 0 at pole so not really latitude
-	const viewerLatitude = 39   / 360 * 2 * Math.PI;
-
-	const equatorialMoonDir = new THREE.Vector3(
-		Math.sin(moonAngle), 0, -Math.cos(moonAngle)
-	);
-	const eclipticSunDir = new THREE.Vector3(
-		Math.sin(sunAngle), 0, -Math.cos(sunAngle)
-	);
-
-	const eclipticToEquatorial = new THREE.Matrix4()
-		.makeRotationAxis( NORTH, axialTilt );
-	const equatorialSunDir = eclipticSunDir
-		.applyMatrix4( eclipticToEquatorial );
-
-	const earthSpinMatrix = new THREE.Matrix4()
-		.makeRotationAxis( UP, earthRotationAngle );
-	const latitudeRotationMatrix = new THREE.Matrix4()
-		.makeRotationAxis( NORTH, viewerLatitude );
-
-	skyUniforms.uSkyRotation.value = earthSpinMatrix
-		.premultiply( latitudeRotationMatrix );
-	skyUniforms.uSunDir.value = equatorialSunDir
-		.applyMatrix4( skyUniforms.uSkyRotation.value );
-	skyUniforms.uMoonDir.value = equatorialMoonDir
-		.applyMatrix4( skyUniforms.uSkyRotation.value );
 }
 
 
@@ -165,21 +123,9 @@ new ResizeObserver(
 ).observe( canvas );
 
 
-function render( millis, lastMillis ) {
-    requestAnimationFrame( 
-        newMillis => render(newMillis, millis) );
+//renderer.render(scene, camera);
 
-    const newuTime = skyUniforms.uTime.value 
-        + (millis - lastMillis) * 0.001 * !timePaused;
-    skyUniforms.uTime.value = newuTime;
-	setAstroUniforms( newuTime * 1e+7 );
-
-    renderer.render(scene, camera);
-}
-//render(0, 0);
-
-setAstroUniforms(0);
-skyUniforms.uSunDir.value.set(0, -0.08, -1).normalize();
+skyUniforms.uSunDir.value.set(0, -0.06, -1).normalize();
 window.addEventListener("DOMContentLoaded",
     () => setTimeout( () => renderer.render(scene, camera), 0 )
 );
