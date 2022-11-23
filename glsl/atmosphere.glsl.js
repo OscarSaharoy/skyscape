@@ -6,7 +6,7 @@ export default `
 vec3 atmosphereNoise( vec3 viewDir ) {
 
 	return vec3(
-		0.006 * ( hash31( viewDir*10. ) - 0.5 ) 
+		0.001 * ( hash31( viewDir*10. ) - 0.5 )
 	);
 }
 

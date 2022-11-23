@@ -30,7 +30,7 @@ void main() {
 	//light += sunLight( viewDir );
 	//light += moonLight( viewDir );
     light += atmosphereLight( viewDir );
-	//light += atmosphereNoise( viewDir );
+	light += atmosphereNoise( viewDir );
     //light += oceanLight( viewDir, light );
     
 	light += sunLight( viewDir );
