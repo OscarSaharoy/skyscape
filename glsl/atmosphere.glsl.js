@@ -34,7 +34,7 @@ vec3 extinction( vec3 point ) {
 vec3 opticalDepth( 
         vec3 rayOrigin, vec3 rayDir, float rayLength ) {
 
-    int nSamples = 10;
+    int nSamples = 5;
     vec3 opticalDepth = vec3(0.);
     float stepSize = 
         rayLength / float(nSamples);
@@ -103,7 +103,7 @@ vec3 inScatteredLightAtPoint(
 vec3 inScatteredLightAlongViewray( 
         vec3 viewPos, vec3 viewDir, float rayLength ) {
 
-    int nSamples = 10;
+    int nSamples = 5;
     vec3 inScatteredLight = vec3(0.);
     float stepSize = 
         rayLength / float(nSamples);

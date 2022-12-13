@@ -1,13 +1,14 @@
 // Oscar Saharoy 2022
 
 import * as THREE from "./three.module.js"; 
-import { camera, panCamera, zoomCamera } from "./skyscape.js";
+import { camera, panCamera, zoomCamera, skyUniforms } from "./skyscape.js";
 
 const canvas = document.querySelector( "#shader-canvas" );
 
 const activePointers = {};
 let prevMeanPointer = new THREE.Vector3();
 let prevPointerSpread = 0;
+let draggingSun = false;
 
 
 function getRelativePointerPos( event ) {
@@ -36,10 +37,40 @@ function getPointerSpread( activePointers ) {
                  .reduce( (acc, val) => acc + mean.distanceTo(val), 0 );
 }
 
+function pointerOverSun( event ) {
+
+    const canvasBox = canvas.getBoundingClientRect();
+    const clipX = event.clientX / canvasBox.width  * 2 - 1;
+    const clipY = event.clientY / canvasBox.height * 2 - 1;
+
+    const clipVec = new THREE.Vector3( clipX, clipY, 0 );
+	const direction = clipVec.unproject( camera ).normalize();
+
+	return direction.dot( skyUniforms.uSunDir.value ) > 0.992;
+}
+
+function setSunDir( meanPointer ) {
+
+    const canvasBox = canvas.getBoundingClientRect();
+    const clipX = meanPointer.x * 2 * Math.max(canvasBox.width, canvasBox.height) / canvasBox.width;
+    const clipY = -meanPointer.y * 2 * Math.max(canvasBox.width, canvasBox.height) / canvasBox.height;
+
+    const clipVec = new THREE.Vector3( clipX, clipY, 0 );
+	skyUniforms.uSunDir.value = clipVec.unproject( camera ).normalize();
+
+	panCamera( new THREE.Vector3() );
+}
+
 
 function onPointerdown( event ) {
 
+	if( draggingSun && Object.keys(activePointers).length ) return;
+
     activePointers[event.pointerId] = getRelativePointerPos( event );
+
+	if( Object.keys(activePointers).length == 1
+			&& pointerOverSun(event) )
+		draggingSun = true;
     
     prevMeanPointer = getMeanPointerPos( activePointers );
     prevPointerSpread = getPointerSpread( activePointers );
@@ -60,6 +91,7 @@ function onPointerup( event ) {
     // remove the pointer from activePointers
     // (does nothing if it wasnt in them)
     delete activePointers[event.pointerId];
+	draggingSun = false;
     
     if( !Object.keys(activePointers).length ) 
         return canvas.style.cursor = "auto";
@@ -73,6 +105,9 @@ function controlsLoop() {
     requestAnimationFrame( controlsLoop );
 
     if( !Object.keys(activePointers).length ) return;
+
+	if( draggingSun )
+		return setSunDir( getMeanPointerPos( activePointers ) );
 
     const meanDelta = getMeanPointerPos( activePointers ).sub( prevMeanPointer );
     prevMeanPointer = getMeanPointerPos( activePointers ); 

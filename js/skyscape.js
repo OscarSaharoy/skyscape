@@ -13,11 +13,12 @@ const renderer = new THREE.WebGLRenderer(
 const dpr   = window.devicePixelRatio;
 //renderer.setPixelRatio(dpr);
 
-const UP    = new THREE.Vector3( 0, 1, 0 );
-const NORTH = new THREE.Vector3(  1, 0,  0 );
-const SOUTH = new THREE.Vector3( -1, 0,  0 );
-const EAST  = new THREE.Vector3(  0, 0,  1 );
-const WEST  = new THREE.Vector3(  0, 0, -1 );
+const UP    = new THREE.Vector3(  0,  1,  0 );
+const DOWN  = new THREE.Vector3(  0, -1,  0 );
+const NORTH = new THREE.Vector3(  1,  0,  0 );
+const SOUTH = new THREE.Vector3( -1,  0,  0 );
+const EAST  = new THREE.Vector3(  0,  0,  1 );
+const WEST  = new THREE.Vector3(  0,  0, -1 );
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color( 0xb01050 );
@@ -33,7 +34,7 @@ const cameraForward = new THREE.Vector3( 0, 0, -1 );
 camera.lookAt( cameraForward );
 
 
-const skyUniforms = {
+export const skyUniforms = {
     uTime:        { value: 0. },
     uResolution:  { value: new THREE.Vector2() },
 	uZoom:        { value: 1. },
@@ -99,6 +100,8 @@ export function zoomCamera( delta, centre ) {
     camera.updateProjectionMatrix();
 
 	skyUniforms.uZoom.value = camera.zoom;
+
+	renderer.render(scene, camera);
 }
 
 
