@@ -6,6 +6,7 @@
 import * as THREE from './three.module.js'; 
 import skyVertexShader from "../glsl/skyVertex.glsl.js";
 import skyFragmentShader from "../glsl/skyFragment.glsl.js";
+import { setupResize } from "./resize.js";
 
 export const canvas = document.querySelector( "#shader-canvas" );
 const renderer = new THREE.WebGLRenderer( {canvas: canvas, antialias: true} );
@@ -21,7 +22,6 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color( 0xb01050 );
 
 const aspect = canvas.width / canvas.height;
-const dpr    = window.devicePixelRatio;
 const fov    = Math.min( 60 * Math.max( 1, 1/aspect ), 100 );
 const near   = 0.1;
 const far    = 30;
@@ -31,6 +31,8 @@ camera.lookAt( cameraForward );
 //renderer.setPixelRatio(dpr);
 
 export const renderScene = () => renderer.render(scene, camera);
+
+setupResize( canvas, camera, renderer );
 
 
 export const skyUniforms = {
@@ -62,29 +64,6 @@ const skyMaterial = new THREE.ShaderMaterial({
     // render the sphere first and clear depth buffer 
     // straight after so it appears behind everything
     sphere.renderOrder = -1;
-    sphere.onAfterRender = 
-        renderer => renderer.clearDepth();
+    sphere.onAfterRender = renderer => renderer.clearDepth();
 }
-
-
-
-function resizeRendererToDisplaySize( renderer ) {
-
-    const width   = canvas.clientWidth;
-    const height  = canvas.clientHeight;
-
-    renderer.setSize( width*dpr, height*dpr, false );
-    skyUniforms.uResolution.value.set( width*dpr, height*dpr );
-
-    const aspect = canvas.width / canvas.height;
-    camera.aspect = aspect;
-    camera.fov = Math.min( 60 * Math.max( 1, 1/aspect ), 100 );
-    camera.updateProjectionMatrix();
-
-	renderScene();
-}
-
-new ResizeObserver( 
-	() => resizeRendererToDisplaySize(renderer) 
-).observe( canvas );
 
