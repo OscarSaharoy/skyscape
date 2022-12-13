@@ -7,8 +7,8 @@ import { canvas, skyUniforms } from "./skyscape.js";
 export function pointerOverSun( camera, event ) {
 
     const canvasBox = canvas.getBoundingClientRect();
-    const clipX = event.clientX / canvasBox.width  * 2 - 1;
-    const clipY = event.clientY / canvasBox.height * 2 - 1;
+    const clipX =   event.clientX / canvasBox.width  * 2 - 1;
+    const clipY = - event.clientY / canvasBox.height * 2 + 1;
 
     const clipVec = new THREE.Vector3( clipX, clipY, 0 );
 	const direction = clipVec.unproject( camera ).normalize();
