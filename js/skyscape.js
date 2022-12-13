@@ -87,8 +87,6 @@ export function panCamera( delta ) {
     cameraForward.add( adjust );
     cameraForward.normalize();
     camera.lookAt( cameraForward );
-
-	renderer.render(scene, camera);
 }
 
 export function zoomCamera( delta, centre ) {
@@ -100,9 +98,9 @@ export function zoomCamera( delta, centre ) {
     camera.updateProjectionMatrix();
 
 	skyUniforms.uZoom.value = camera.zoom;
-
-	renderer.render(scene, camera);
 }
+
+export const renderScene = () => renderer.render(scene, camera);
 
 
 function resizeRendererToDisplaySize( renderer ) {
