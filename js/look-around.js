@@ -1,10 +1,12 @@
 // Oscar Saharoy 2022
 
 import * as THREE from "./three.module.js"; 
-import { renderScene, camera, panCamera, zoomCamera, skyUniforms } from "./skyscape.js";
+import { renderScene, canvas, camera, skyUniforms } from "./skyscape.js";
+import { panCamera, zoomCamera } from "./camera-control.js";
+import { pointerOverSun, setSunDirection } from "./sun-control.js";
 
-const canvas = document.querySelector( "#shader-canvas" );
 
+const cameraForward = new THREE.Vector3( 0, 0, -1 );
 const activePointers = {};
 let prevMeanPointer = new THREE.Vector3();
 let prevPointerSpread = 0;
@@ -37,30 +39,6 @@ function getPointerSpread( activePointers ) {
                  .reduce( (acc, val) => acc + mean.distanceTo(val), 0 );
 }
 
-function pointerOverSun( event ) {
-
-    const canvasBox = canvas.getBoundingClientRect();
-    const clipX = event.clientX / canvasBox.width  * 2 - 1;
-    const clipY = event.clientY / canvasBox.height * 2 - 1;
-
-    const clipVec = new THREE.Vector3( clipX, clipY, 0 );
-	const direction = clipVec.unproject( camera ).normalize();
-
-	return direction.dot( skyUniforms.uSunDir.value ) > 0.98;
-}
-
-function setSunDir( meanPointer ) {
-
-    const canvasBox = canvas.getBoundingClientRect();
-    const clipX = meanPointer.x * 2 * Math.max(canvasBox.width, canvasBox.height) / canvasBox.width;
-    const clipY = -meanPointer.y * 2 * Math.max(canvasBox.width, canvasBox.height) / canvasBox.height;
-
-    const clipVec = new THREE.Vector3( clipX, clipY, 0 );
-	skyUniforms.uSunDir.value = clipVec.unproject( camera ).normalize();
-
-	panCamera( new THREE.Vector3() );
-}
-
 
 function onPointerdown( event ) {
 
@@ -69,7 +47,7 @@ function onPointerdown( event ) {
     activePointers[event.pointerId] = getRelativePointerPos( event );
 
 	if( Object.keys(activePointers).length == 1
-			&& pointerOverSun(event) )
+			&& pointerOverSun(camera, event) )
 		draggingSun = true;
     
     prevMeanPointer = getMeanPointerPos( activePointers );
@@ -100,35 +78,39 @@ function onPointerup( event ) {
     prevPointerSpread = getPointerSpread( activePointers );
 }
 
+function onWheel( event ) {
+
+	event.preventDefault();
+    zoomCamera( -event.deltaY / 200, getRelativePointerPos(event) ); 
+
+	renderScene();
+}
+
+
 function controlsLoop() {
 
     requestAnimationFrame( controlsLoop );
 
     if( !Object.keys(activePointers).length ) return;
 
-	if( draggingSun ) {
-		setSunDir( getMeanPointerPos( activePointers ) );
-		renderScene();
-		return;
+	if( draggingSun )
+		setSunDirection( camera, getMeanPointerPos( activePointers ) );
+
+	else {
+		const meanDelta = getMeanPointerPos( activePointers ).sub( prevMeanPointer );
+		prevMeanPointer = getMeanPointerPos( activePointers ); 
+		panCamera( camera, cameraForward, meanDelta );
+
+		const spreadDelta = getPointerSpread( activePointers ) - prevPointerSpread;
+		prevPointerSpread = getPointerSpread( activePointers );
+		zoomCamera( camera, spreadDelta * 40, getMeanPointerPos(activePointers) );
+		skyUniforms.uZoom.value = camera.zoom;
 	}
-
-    const meanDelta = getMeanPointerPos( activePointers ).sub( prevMeanPointer );
-    prevMeanPointer = getMeanPointerPos( activePointers ); 
-    panCamera( meanDelta );
-
-    const spreadDelta = getPointerSpread( activePointers ) - prevPointerSpread;
-    prevPointerSpread = getPointerSpread( activePointers );
-    zoomCamera( spreadDelta * 40, getMeanPointerPos(activePointers) );
 
 	renderScene();
 }
 controlsLoop();
 
-function onWheel( event ) {
-
-	event.preventDefault();
-    zoomCamera( -event.deltaY / 200, getRelativePointerPos(event) ); 
-}
 
 canvas.addEventListener( "pointerdown", onPointerdown );
 canvas.addEventListener( "pointermove", onPointermove );

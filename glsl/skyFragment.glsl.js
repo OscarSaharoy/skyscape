@@ -32,10 +32,11 @@ void main() {
     light += atmosphereLight( viewDir );
 	light += atmosphereNoise( viewDir );
     //light += oceanLight( viewDir, light );
-    
 	light += sunLight( viewDir );
 
     gl_FragColor.a = 1.;
+
+	// gamma correction
     gl_FragColor.rgb = pow(light , vec3(1. / 2.2));
 }
 
