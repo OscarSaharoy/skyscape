@@ -6,7 +6,6 @@ import { panCamera, zoomCamera } from "./camera-control.js";
 import { pointerOverSun, setSunDirection } from "./sun-control.js";
 
 
-const cameraForward = new THREE.Vector3( 0, 0, -1 );
 const activePointers = {};
 let prevMeanPointer = new THREE.Vector3();
 let prevPointerSpread = 0;
@@ -99,7 +98,7 @@ function controlsLoop() {
 	else {
 		const meanDelta = getMeanPointerPos( activePointers ).sub( prevMeanPointer );
 		prevMeanPointer = getMeanPointerPos( activePointers ); 
-		panCamera( camera, cameraForward, meanDelta );
+		panCamera( camera, meanDelta );
 
 		const spreadDelta = getPointerSpread( activePointers ) - prevPointerSpread;
 		prevPointerSpread = getPointerSpread( activePointers );

@@ -52,7 +52,7 @@ const skyMaterial = new THREE.ShaderMaterial({
 
     // render the sphere first and clear depth buffer 
     // straight after so it appears behind everything
-    sphere.renderOrder = -1;
-    sphere.onAfterRender = renderer => renderer.clearDepth();
+    //sphere.renderOrder = -1;
+    //sphere.onAfterRender = renderer => renderer.clearDepth();
 }
 
