@@ -28,10 +28,11 @@ setupResize( canvas, camera, renderer );
 export const skyUniforms = {
     uTime:        { value: 0. },
 	uZoom:        { value: 1. },
+	uFramesStationary: { value: 0 },
     uResolution:  { value: new THREE.Vector2() },
-	uStarsRotation: { value: new THREE.Matrix4() },
 	uSunDir:      { value: new THREE.Vector3() },
 	uMoonDir:     { value: new THREE.Vector3() },
+	uStarsRotation: { value: new THREE.Matrix4() },
 };
 skyUniforms.uSunDir.value.set(0, -0.06, -1).normalize();
 
@@ -55,4 +56,10 @@ const skyMaterial = new THREE.ShaderMaterial({
     //sphere.renderOrder = -1;
     //sphere.onAfterRender = renderer => renderer.clearDepth();
 }
+
+// render every frame
+( function renderLoop() {
+	requestAnimationFrame( renderLoop );
+	renderScene();
+} )();
 

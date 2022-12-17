@@ -81,8 +81,6 @@ function onWheel( event ) {
 
 	event.preventDefault();
     zoomCamera( camera, -event.deltaY / 200, getRelativePointerPos(event) ); 
-
-	renderScene();
 }
 
 
@@ -90,7 +88,11 @@ function controlsLoop() {
 
     requestAnimationFrame( controlsLoop );
 
-    if( !Object.keys(activePointers).length ) return;
+    if( !Object.keys(activePointers).length ) 
+		return ++skyUniforms.uFramesStationary.value;
+
+	else skyUniforms.uFramesStationary.value = 0;
+
 
 	if( draggingSun )
 		setSunDirection( camera, getMeanPointerPos( activePointers ) );
@@ -105,8 +107,6 @@ function controlsLoop() {
 		zoomCamera( camera, spreadDelta * 40, getMeanPointerPos(activePointers) );
 		skyUniforms.uZoom.value = camera.zoom;
 	}
-
-	renderScene();
 }
 controlsLoop();
 

@@ -3,11 +3,12 @@
 export default `
 
 uniform float uTime;
-uniform vec2 uResolution;
 uniform float uZoom;
-uniform mat4 uStarsRotation;
+uniform float uFramesStationary;
+uniform vec2 uResolution;
 uniform vec3 uSunDir;
 uniform vec3 uMoonDir;
+uniform mat4 uStarsRotation;
 
 varying vec3 vNormal;
 
