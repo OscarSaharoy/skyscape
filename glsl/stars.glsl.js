@@ -59,7 +59,7 @@ vec3 starFunction( vec3 celluv ) {
 vec3 starLight( vec3 viewDir ) {
 
 	vec3 rotatedView = 
-		(vec4(viewDir, 1.) * uSkyRotation).xyz;
+		(vec4(viewDir, 1.) * uStarsRotation).xyz;
 
     vec3 light = vec3(0);
 

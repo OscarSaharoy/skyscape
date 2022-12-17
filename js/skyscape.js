@@ -29,7 +29,7 @@ export const skyUniforms = {
     uTime:        { value: 0. },
 	uZoom:        { value: 1. },
     uResolution:  { value: new THREE.Vector2() },
-	uSkyRotation: { value: new THREE.Matrix4() },
+	uStarsRotation: { value: new THREE.Matrix4() },
 	uSunDir:      { value: new THREE.Vector3() },
 	uMoonDir:     { value: new THREE.Vector3() },
 };
