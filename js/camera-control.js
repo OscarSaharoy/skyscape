@@ -23,7 +23,7 @@ export function panCamera( camera, delta ) {
         over.normalize();
 
 	// compensate panning sensitivity for camera zoom
-    const sensitivity = -9 / (camera.zoom + 2.);
+    const sensitivity = -2. * camera.getEffectiveFOV() / camera.fov;
 
 	// calculate adjustment vector to camera direction from panning movement 
 	// and scale by sensitivity
