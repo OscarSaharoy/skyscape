@@ -9,7 +9,9 @@ import skyFragmentShader from "../glsl/skyFragment.glsl.js";
 import { setupResize } from "./resize.js";
 
 export const canvas = document.querySelector( "#shader-canvas" );
-const renderer      = new THREE.WebGLRenderer( {canvas: canvas, antialias: true} );
+const renderer      = new THREE.WebGLRenderer( {canvas: canvas, antialias: true, preserveDrawingBuffer: true} );
+renderer.autoClearColor = false;
+renderer.autoClearDepth = true;
 
 const scene      = new THREE.Scene();
 scene.background = new THREE.Color( 0xb01050 );
@@ -41,7 +43,8 @@ const skyMaterial = new THREE.ShaderMaterial({
     vertexShader: skyVertexShader,
     fragmentShader: skyFragmentShader,
     uniforms: skyUniforms,
-    side: THREE.BackSide
+    side: THREE.BackSide,
+	transparent: true,
 });
 
 
@@ -56,6 +59,7 @@ const skyMaterial = new THREE.ShaderMaterial({
     //sphere.renderOrder = -1;
     //sphere.onAfterRender = renderer => renderer.clearDepth();
 }
+123g
 
 // render every frame
 ( function renderLoop() {

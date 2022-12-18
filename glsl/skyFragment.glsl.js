@@ -34,10 +34,11 @@ void main() {
     //light += oceanLight( viewDir, light );
 	light += sunLight( viewDir );
 
-    gl_FragColor.a = 1.;
+    gl_FragColor.a = uFramesStationary == 0. ? 1. : 0.05;
 
 	// gamma correction
-    gl_FragColor.rgb = pow(light , vec3(1. / 2.2));
+    light = pow(light , vec3(1. / 2.2));
+	gl_FragColor.rgb = light;
 }
 
 `;
