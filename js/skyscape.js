@@ -9,7 +9,8 @@ import skyFragmentShader from "../glsl/skyFragment.glsl.js";
 import { setupResize } from "./resize.js";
 
 export const canvas = document.querySelector( "#shader-canvas" );
-const renderer      = new THREE.WebGLRenderer( {canvas: canvas, antialias: true, preserveDrawingBuffer: true} );
+export const accumulationBuffer = new THREE.WebGLRenderTarget(0, 0);
+const renderer = new THREE.WebGLRenderer( {canvas: canvas, antialias: true, preserveDrawingBuffer: true} );
 renderer.autoClearColor = false;
 renderer.autoClearDepth = true;
 
@@ -24,7 +25,7 @@ export const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
 
 export const renderScene = () => renderer.render(scene, camera);
 
-setupResize( canvas, camera, renderer );
+setupResize( canvas, camera, renderer, accumulationBuffer );
 
 
 export const skyUniforms = {
@@ -35,6 +36,7 @@ export const skyUniforms = {
 	uSunDir:      { value: new THREE.Vector3() },
 	uMoonDir:     { value: new THREE.Vector3() },
 	uStarsRotation: { value: new THREE.Matrix4() },
+	uAccumulator: { value: accumulationBuffer.texture },
 };
 skyUniforms.uSunDir.value.set(0, -0.06, -1).normalize();
 

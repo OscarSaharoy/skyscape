@@ -5,13 +5,15 @@ import { renderScene, skyUniforms } from "./skyscape.js";
 
 const dpr  = window.devicePixelRatio;
 
-function resizeRendererToDisplaySize( canvas, camera, renderer ) {
+function resizeRendererToDisplaySize( canvas, camera, renderer, accumulationBuffer ) {
 
     const width   = canvas.clientWidth;
     const height  = canvas.clientHeight;
 
     renderer.setSize( width*dpr, height*dpr, false );
     skyUniforms.uResolution.value.set( width*dpr, height*dpr );
+	accumulationBuffer.setSize( width*dpr, height*dpr );
+	skyUniforms.uAccumulator = accumulationBuffer.texture;
 
     const aspect = canvas.width / canvas.height;
     camera.aspect = aspect;
@@ -23,8 +25,8 @@ function resizeRendererToDisplaySize( canvas, camera, renderer ) {
 	renderScene();
 }
 
-export const setupResize = (canvas, camera, renderer) => 
+export const setupResize = (canvas, camera, renderer, accumulationBuffer) => 
 	new ResizeObserver( 
-		() => resizeRendererToDisplaySize( canvas, camera, renderer ) 
+		() => resizeRendererToDisplaySize( canvas, camera, renderer, accumulationBuffer ) 
 	).observe( canvas );
 
