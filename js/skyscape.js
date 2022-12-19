@@ -12,7 +12,6 @@ export const canvas = document.querySelector( "#shader-canvas" );
 export const accumulationBuffer = new THREE.WebGLRenderTarget(0, 0);
 const renderer = new THREE.WebGLRenderer( {canvas: canvas, antialias: true, preserveDrawingBuffer: true} );
 renderer.autoClearColor = false;
-renderer.autoClearDepth = true;
 
 const scene      = new THREE.Scene();
 scene.background = new THREE.Color( 0xb01050 );
