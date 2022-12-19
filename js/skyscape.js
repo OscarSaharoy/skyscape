@@ -9,7 +9,7 @@ import skyFragmentShader from "../glsl/skyFragment.glsl.js";
 import { setupResize } from "./resize.js";
 
 export const canvas = document.querySelector( "#shader-canvas" );
-export const accumulationBuffer = new THREE.WebGLRenderTarget(0, 0);
+export const accumulationBuffer = new THREE.WebGLRenderTarget( 0, 0, {depthBuffer: false} );
 const renderer = new THREE.WebGLRenderer( {canvas: canvas, antialias: true, preserveDrawingBuffer: true} );
 renderer.autoClearColor = false;
 
@@ -23,6 +23,11 @@ const far    = 30;
 export const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
 
 export const renderScene = () => renderer.render(scene, camera);
+// new render order, 4 buffers, 3 render passes
+// copy accumulator into new buffer to give to raymarcher
+// raymarch -> render into and update accumulator
+// render into sky buffer (combine accumulator with stars, sun etc)
+// render onto screen (using sky texture and SSR on ocean)
 
 setupResize( canvas, camera, renderer, accumulationBuffer );
 
