@@ -18,6 +18,8 @@ function resizeRendererToDisplaySize( canvas, camera, renderer ) {
     camera.fov = Math.min( 60 * Math.max( 1, 1/aspect ), 100 );
     camera.updateProjectionMatrix();
 
+	skyUniforms.uFramesStationary.value = 0;
+
 	renderScene();
 }
 

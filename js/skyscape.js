@@ -59,11 +59,10 @@ const skyMaterial = new THREE.ShaderMaterial({
     //sphere.renderOrder = -1;
     //sphere.onAfterRender = renderer => renderer.clearDepth();
 }
-123g
 
 // render every frame
 ( function renderLoop() {
 	requestAnimationFrame( renderLoop );
-	renderScene();
+	if( skyUniforms.uFramesStationary.value < 5 ) renderScene();
 } )();
 
