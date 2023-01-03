@@ -1,8 +1,9 @@
 // Oscar Saharoy 2022
 
 import * as THREE from "./three.module.js"; 
-import { renderScene, canvas, camera, skyUniforms } from "./skyscape.js";
-import { panCamera, zoomCamera } from "./camera-control.js";
+import { canvas } from "./canvas.js";
+import { camera, panCamera, zoomCamera } from "./camera.js";
+import { skyUniforms } from "./skyscape.js";
 import { pointerOverSun, setSunDirection } from "./sun-control.js";
 
 
@@ -100,11 +101,11 @@ function controlsLoop() {
 	else {
 		const meanDelta = getMeanPointerPos( activePointers ).sub( prevMeanPointer );
 		prevMeanPointer = getMeanPointerPos( activePointers ); 
-		panCamera( camera, meanDelta );
+		panCamera( meanDelta );
 
 		const spreadDelta = getPointerSpread( activePointers ) - prevPointerSpread;
 		prevPointerSpread = getPointerSpread( activePointers );
-		zoomCamera( camera, spreadDelta * 40, getMeanPointerPos(activePointers) );
+		zoomCamera( spreadDelta * 40 );
 		skyUniforms.uZoom.value = camera.zoom;
 	}
 }

@@ -29,16 +29,15 @@ void main() {
     //light += starLight( viewDir );
 	//light += sunLight( viewDir );
 	//light += moonLight( viewDir );
-    light += atmosphereLight( viewDir );
+    light += texture2D(uAtmosphereLight, gl_FragCoord.xy/1000.).xyz; //light += atmosphereLight( viewDir );
 	light += atmosphereNoise( viewDir );
     //light += oceanLight( viewDir, light );
 	light += sunLight( viewDir );
 
-    gl_FragColor.a = uFramesStationary == 0. ? 1. : 0.05;
-
 	// gamma correction
     light = pow(light , vec3(1. / 2.2));
-	gl_FragColor.rgb = light;
+
+	gl_FragColor = vec4( light, 1. );
 }
 
 `;

@@ -1,7 +1,8 @@
 // Oscar Saharoy 2022
 
 import * as THREE from "./three.module.js"; 
-import { canvas, skyUniforms } from "./skyscape.js";
+import { skyUniforms } from "./skyscape.js";
+import { canvas } from "./canvas.js";
 
 
 export function pointerOverSun( camera, event ) {
@@ -26,6 +27,7 @@ export function setSunDirection( camera, meanRelativePointer ) {
     const clipX  = meanRelativePointer.x * 2 * Math.max(canvasBox.width, canvasBox.height) / canvasBox.width;
     const clipY = -meanRelativePointer.y * 2 * Math.max(canvasBox.width, canvasBox.height) / canvasBox.height;
 
+	// set the sun direction to match the pointer location
     const clipVec = new THREE.Vector3( clipX, clipY, 0 );
 	skyUniforms.uSunDir.value = clipVec.unproject( camera ).normalize();
 }

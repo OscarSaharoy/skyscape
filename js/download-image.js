@@ -1,6 +1,6 @@
 // Oscar Saharoy 2022
 
-import { canvas } from "./skyscape.js";
+import { canvas } from "./canvas.js";
 
 
 export function downloadImage() {

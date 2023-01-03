@@ -1,19 +1,22 @@
-// Oscar Saharoy 2022
+// Oscar Saharoy 2023
 
-import { renderScene, skyUniforms } from "./skyscape.js";
+import { skyUniforms, renderer } from "./skyscape.js";
+import { canvas } from "./canvas.js";
+import { camera } from "./camera.js";
+import { atmosphereLightBuffer } from "./atmosphere-light.js";
 
 
-const dpr  = window.devicePixelRatio;
+const dpr = window.devicePixelRatio;
 
-function resizeRendererToDisplaySize( canvas, camera, renderer, accumulationBuffer ) {
+function resize() {
 
-    const width   = canvas.clientWidth;
-    const height  = canvas.clientHeight;
+    const width  = canvas.clientWidth;
+    const height = canvas.clientHeight;
 
     renderer.setSize( width*dpr, height*dpr, false );
+	atmosphereLightBuffer.setSize( width*dpr, height*dpr );
+
     skyUniforms.uResolution.value.set( width*dpr, height*dpr );
-	accumulationBuffer.setSize( width*dpr, height*dpr );
-	skyUniforms.uAccumulator = accumulationBuffer.texture;
 
     const aspect = canvas.width / canvas.height;
     camera.aspect = aspect;
@@ -21,12 +24,7 @@ function resizeRendererToDisplaySize( canvas, camera, renderer, accumulationBuff
     camera.updateProjectionMatrix();
 
 	skyUniforms.uFramesStationary.value = 0;
-
-	renderScene();
 }
 
-export const setupResize = (canvas, camera, renderer, accumulationBuffer) => 
-	new ResizeObserver( 
-		() => resizeRendererToDisplaySize( canvas, camera, renderer, accumulationBuffer ) 
-	).observe( canvas );
+new ResizeObserver( resize ).observe( canvas );
 

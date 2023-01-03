@@ -1,13 +1,21 @@
-// Oscar Saharoy 2022
+// Oscar Saharoy 2023
 
+import { canvas } from "./canvas.js";
 import * as THREE from './three.module.js'; 
 
 
 // vector the points toward azimuth
 const UP = new THREE.Vector3(  0,  1,  0 );
 
+const aspect = canvas.width / canvas.height;
+const fov    = Math.min( 60 * Math.max( 1, 1/aspect ), 100 );
+const near   = 0.1;
+const far    = 30;
 
-export function panCamera( camera, delta ) {
+export const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+
+
+export function panCamera( delta ) {
 
 	// generate perpendicular vector basis (not normalised)
 	const cameraForward = camera.getWorldDirection( new THREE.Vector3() );
@@ -39,7 +47,7 @@ export function panCamera( camera, delta ) {
 }
 
 
-export function zoomCamera( camera, delta ) {
+export function zoomCamera( delta ) {
     
 	// calculate the adjustment from the zoom event delta
     const adjust = 1.17 ** delta;

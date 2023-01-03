@@ -9,6 +9,7 @@ uniform vec2 uResolution;
 uniform vec3 uSunDir;
 uniform vec3 uMoonDir;
 uniform mat4 uStarsRotation;
+uniform sampler2D uAtmosphereLight;
 
 varying vec3 vNormal;
 
