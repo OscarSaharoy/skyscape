@@ -11,7 +11,6 @@ import { camera } from "./camera.js";
 
 
 export const renderer = new THREE.WebGLRenderer( {canvas: canvas, antialias: true} );
-renderer.autoClear = false;
 
 const scene      = new THREE.Scene();
 scene.background = new THREE.Color( 0xb01050 );

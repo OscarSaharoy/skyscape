@@ -131,8 +131,6 @@ vec3 inScatteredLightAlongViewray(
 
 vec3 atmosphereLight( vec3 viewDir ) {
 
-	//return texture2D(uAtmosphereLight, gl_FragCoord.xy/1000.).xyz;
-
 	float distThroughAtmosphere = intersectSphere(
 		vec3(0), viewDir, 
 		EARTH_CENTRE, ATMOSPHERE_RADIUS
