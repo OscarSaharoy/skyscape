@@ -42,6 +42,7 @@ export const skyUniforms = {
 	uMoonDir:     { value: new THREE.Vector3() },
 	uStarsRotation: { value: new THREE.Matrix4() },
 	uAtmosphereLight: { value: null },
+	uAtmosphereLightPrev: { value: null },
 };
 skyUniforms.uSunDir.value.set(0, -0.06, -1).normalize();
 

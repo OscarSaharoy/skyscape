@@ -13,7 +13,6 @@ import { camera } from "./camera.js";
 export const atmosphereLightBuffer = new THREE.WebGLRenderTarget( 1, 1, { depthBuffer: false, type: THREE.FloatType } );
 skyUniforms.uAtmosphereLight.value = atmosphereLightBuffer.texture;
 
-
 const scene = new THREE.Scene();
 const renderScene = () => renderer.render(scene, camera);
 
@@ -32,8 +31,12 @@ scene.add( sphere );
 
 // render loop
 ( function renderLoop() {
-	renderer.setRenderTarget( atmosphereLightBuffer );
 	requestAnimationFrame( renderLoop );
-	if( skyUniforms.uFramesStationary.value < 5 ) renderScene();
+
+	if( skyUniforms.uFramesStationary.value >= 5 ) return;
+
+	renderer.setRenderTarget( atmosphereLightBuffer );
+	renderScene();
+	
 } )();
 

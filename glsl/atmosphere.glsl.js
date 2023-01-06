@@ -34,16 +34,15 @@ vec3 extinction( vec3 point ) {
 vec3 opticalDepth( 
         vec3 rayOrigin, vec3 rayDir, float rayLength ) {
 
-    int nSamples = 5;
     vec3 opticalDepth = vec3(0.);
     float stepSize = 
-        rayLength / float(nSamples);
+        rayLength / float(NSAMPLES);
     vec3 samplePoint = rayOrigin;
 
     vec3 prevSample = extinction(samplePoint);
     samplePoint += rayDir * stepSize;
 
-    for( int i = 0; i < nSamples; i++ ) {
+    for( int i = 0; i < NSAMPLES; i++ ) {
 
         vec3 newSample = extinction(samplePoint);
 
@@ -103,17 +102,16 @@ vec3 inScatteredLightAtPoint(
 vec3 inScatteredLightAlongViewray( 
         vec3 viewPos, vec3 viewDir, float rayLength ) {
 
-    int nSamples = 5;
     vec3 inScatteredLight = vec3(0.);
     float stepSize = 
-        rayLength / float(nSamples);
+        rayLength / float(NSAMPLES);
     vec3 samplePoint = viewPos;
 
     vec3 prevSample = inScatteredLightAtPoint(
         samplePoint, viewDir, viewPos);
     samplePoint += viewDir * stepSize;
 
-    for( int i = 0; i < nSamples; i++ ) {
+    for( int i = 0; i < NSAMPLES; i++ ) {
 
         vec3 newSample = inScatteredLightAtPoint(
             samplePoint, viewDir, viewPos);
