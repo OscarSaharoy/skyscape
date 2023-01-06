@@ -1,7 +1,7 @@
 // Oscar Saharoy 2022
 
 // divert errors to alerts so we can debug on mobile easier
-//window.onerror = error => alert(error);
+window.onerror = error => alert(error);
 
 import * as THREE from './three.module.js'; 
 import skyVertexShader from "../glsl/skyVertex.glsl.js";
@@ -10,7 +10,7 @@ import { canvas } from "./canvas.js";
 import { camera } from "./camera.js";
 
 
-export const renderer = new THREE.WebGLRenderer( {canvas: canvas, antialias: true} );
+export const renderer = new THREE.WebGLRenderer( {canvas: canvas, antialias: true, precision: 'highp'} );
 
 const scene      = new THREE.Scene();
 scene.background = new THREE.Color( 0xb01050 );
