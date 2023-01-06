@@ -3,7 +3,7 @@
 import { skyUniforms, renderer } from "./skyscape.js";
 import { canvas } from "./canvas.js";
 import { camera } from "./camera.js";
-import { atmosphereLightBuffer } from "./atmosphere-light.js";
+import { atmosphereLightBuffers } from "./atmosphere-light.js";
 
 
 const dpr = window.devicePixelRatio;
@@ -14,7 +14,9 @@ function resize() {
     const height = canvas.clientHeight;
 
     renderer.setSize( width*dpr, height*dpr, false );
-	atmosphereLightBuffer.setSize( width*dpr, height*dpr );
+
+	atmosphereLightBuffers.forEach( buffer => 
+		buffer.setSize( width*dpr, height*dpr ) );
 
     skyUniforms.uResolution.value.set( width*dpr, height*dpr );
 

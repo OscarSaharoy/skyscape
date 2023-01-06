@@ -10,8 +10,10 @@ import { skyUniforms, renderer } from "./skyscape.js";
 import { camera } from "./camera.js";
 
 
-export const atmosphereLightBuffer = new THREE.WebGLRenderTarget( 1, 1, { depthBuffer: false, type: THREE.FloatType } );
-skyUniforms.uAtmosphereLight.value = atmosphereLightBuffer.texture;
+export const atmosphereLightBuffers = [
+	new THREE.WebGLRenderTarget( 1, 1, { depthBuffer: false, type: THREE.FloatType } ),
+	new THREE.WebGLRenderTarget( 1, 1, { depthBuffer: false, type: THREE.FloatType } ),
+];
 
 const scene = new THREE.Scene();
 const renderScene = () => renderer.render(scene, camera);
@@ -35,8 +37,16 @@ scene.add( sphere );
 
 	if( skyUniforms.uFramesStationary.value >= 5 ) return;
 
-	renderer.setRenderTarget( atmosphereLightBuffer );
+	// alternate rendering between the two atmospherelight buffers to allow shader to use output of previous render step
+	const activeAtmosphereLightBuffer = 
+		atmosphereLightBuffers[ skyUniforms.uFramesStationary.value % 2 ];
+	const inactiveAtmosphereLightBuffer = 
+		atmosphereLightBuffers[ ( skyUniforms.uFramesStationary.value + 1 ) % 2 ];
+
+	renderer.setRenderTarget( activeAtmosphereLightBuffer );
+	skyUniforms.uAtmosphereLight.value = inactiveAtmosphereLightBuffer.texture;
 	renderScene();
-	
+	skyUniforms.uAtmosphereLight.value = activeAtmosphereLightBuffer.texture;
+
 } )();
 
