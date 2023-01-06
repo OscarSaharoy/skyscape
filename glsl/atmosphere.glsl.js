@@ -139,7 +139,7 @@ vec3 atmosphereLight( vec3 viewDir ) {
             VIEWER_HEIGHT / -viewDir.y;
 
     return inScatteredLightAlongViewray(
-        vec3(0), viewDir, distThroughAtmosphere) + texture2D( uAtmosphereLight, gl_FragCoord.xy/uResolution ).xyz;
+        vec3(0), viewDir, distThroughAtmosphere) + texture2D( uAtmosphereLight, gl_FragCoord.xy/uResolution ).xyz * step( 0.5, uFramesStationary );
 }
 
 `;

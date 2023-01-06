@@ -1,8 +1,5 @@
 // Oscar Saharoy 2022
 
-// divert errors to alerts so we can debug on mobile easier
-//window.onerror = error => alert(error);
-
 import * as THREE from './three.module.js'; 
 import skyVertexShader from "../glsl/skyVertex.glsl.js";
 import atmosphereLightFragmentShader from "../glsl/atmosphereLightFragment.glsl.js";
@@ -10,11 +7,14 @@ import { skyUniforms, renderer } from "./skyscape.js";
 import { camera } from "./camera.js";
 
 
+// setup 2 alternating render targets
 export const atmosphereLightBuffers = [
 	new THREE.WebGLRenderTarget( 1, 1, { depthBuffer: false, type: THREE.FloatType } ),
 	new THREE.WebGLRenderTarget( 1, 1, { depthBuffer: false, type: THREE.FloatType } ),
 ];
 
+
+// create scene and setup sky to render
 const scene = new THREE.Scene();
 const renderScene = () => renderer.render(scene, camera);
 
