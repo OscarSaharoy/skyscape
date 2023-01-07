@@ -4,7 +4,7 @@ import { canvas } from "./canvas.js";
 import * as THREE from './three.module.js'; 
 
 
-// vector the points toward azimuth
+// vector that points toward azimuth
 const UP = new THREE.Vector3(  0,  1,  0 );
 
 const aspect = canvas.width / canvas.height;
