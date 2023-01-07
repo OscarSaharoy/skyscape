@@ -57,11 +57,9 @@ const sphere   = new THREE.Mesh( geometry, skyMaterial );
 scene.add( sphere );
 
 
-// render loop
-( function renderLoop() {
+export function renderScreen() {
+
 	renderer.setRenderTarget( null );
-	requestAnimationFrame( renderLoop );
-	if( skyUniforms.uFramesStationary.value >= 5 ) return;
 	renderScene();
-} )();
+}
 

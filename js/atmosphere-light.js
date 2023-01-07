@@ -32,13 +32,10 @@ const sphere   = new THREE.Mesh( geometry, material );
 scene.add( sphere );
 
 
-// render loop
-( function renderLoop() {
-	requestAnimationFrame( renderLoop );
-
-	if( skyUniforms.uFramesStationary.value >= 5 ) return;
+export function renderAtmosphereLight() {
 
 	// alternate rendering between the two atmospherelight buffers to allow shader to use output of previous render step
+	// (ping pong rendering)
 	const activeAtmosphereLightBuffer = 
 		atmosphereLightBuffers[ skyUniforms.uFramesStationary.value % 2 ];
 	const inactiveAtmosphereLightBuffer = 
@@ -48,6 +45,5 @@ scene.add( sphere );
 	skyUniforms.uAtmosphereLight.value = inactiveAtmosphereLightBuffer.texture;
 	renderScene();
 	skyUniforms.uAtmosphereLight.value = activeAtmosphereLightBuffer.texture;
-
-} )();
+}
 
