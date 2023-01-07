@@ -27,7 +27,7 @@ varying vec3 vNormal;
 #define ATMOSPHERE_RADIUS 6460e+3
 #define VIEWER_HEIGHT 2.
 
-#define NSAMPLES 5
+#define NSAMPLES 2
 #define RAYLEIGH_SCATTERING_COEFFS vec3(5.802, 13.6, 33.1)   * 1e-6
 #define RAYLEIGH_ABSORPTION_COEFFS vec3(0.)                  * 1e-6
 #define MIE_SCATTERING_COEFFS      vec3(3.996)               * 1e-6

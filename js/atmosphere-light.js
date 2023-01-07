@@ -6,11 +6,12 @@ import atmosphereLightFragmentShader from "../glsl/atmosphereLightFragment.glsl.
 import { skyUniforms, renderer } from "./skyscape.js";
 import { camera } from "./camera.js";
 
+const floatType = renderer.capabilities.isWebGL2 ? THREE.FloatType : THREE.HalfFloatType;
 
 // setup 2 alternating render targets
 export const atmosphereLightBuffers = [
-	new THREE.WebGLRenderTarget( 1, 1, { depthBuffer: false, type: THREE.FloatType } ),
-	new THREE.WebGLRenderTarget( 1, 1, { depthBuffer: false, type: THREE.FloatType } ),
+	new THREE.WebGLRenderTarget( 1, 1, { depthBuffer: false, type: floatType, magFilter: THREE.NearestFilter, minFilter: THREE.NearestFilter } ),
+	new THREE.WebGLRenderTarget( 1, 1, { depthBuffer: false, type: floatType, magFilter: THREE.NearestFilter, minFilter: THREE.NearestFilter } ),
 ];
 
 
