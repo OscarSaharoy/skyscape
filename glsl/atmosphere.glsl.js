@@ -138,7 +138,10 @@ vec3 atmosphereLight( vec3 viewDir ) {
         distThroughAtmosphere = 
             VIEWER_HEIGHT / -viewDir.y;
 
-    return inScatteredLightAlongViewray( vec3(0), viewDir, distThroughAtmosphere) + texture2D( uAtmosphereLight, gl_FragCoord.xy/uResolution ).xyz * step( 0.5, uFramesStationary );
+	float hash = hash31( uSunDir + viewDir + uFramesStationary );
+	vec3 scatterPos = distThroughAtmosphere * hash * viewDir;
+
+	return inScatteredLightAtPoint( scatterPos, viewDir, vec3(0) ) * distThroughAtmosphere;
 }
 
 `;
