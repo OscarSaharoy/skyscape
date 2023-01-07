@@ -10,28 +10,14 @@ import { canvas } from "./canvas.js";
 import { camera } from "./camera.js";
 
 
-export const renderer = new THREE.WebGLRenderer( {canvas: canvas, antialias: true, precision: 'highp'} );
-
-const scene      = new THREE.Scene();
-scene.background = new THREE.Color( 0xb01050 );
-
-const renderScene = () => renderer.render(scene, camera);
-
-//need to figure out new rendering order & implement
-// new render order, 4 buffers, 3 render passes
-// copy accumulator into new buffer to give to raymarcher
-// raymarch -> render into and update accumulator
-// render into sky buffer (combine accumulator with stars, sun etc)
-// render onto screen (using sky texture and SSR on ocean)
 //need to figure out accumulation and averaging
 //need to figure out importance sampling
 //need to implment dual scattering approximation style thing
 
-// each frame
-// copy previous sky light into sky light copy 
-// render new sky light step and add on sky light copy -> sky light (float texture)
-// final render: render waves sampling reflections from sky light and adding sun, moon and stars to samples from sky light
+export const renderer = new THREE.WebGLRenderer( {canvas: canvas, antialias: true, precision: 'highp'} );
 
+const scene      = new THREE.Scene();
+scene.background = new THREE.Color( 0xb01050 );
 
 export const skyUniforms = {
     uTime:        { value: 0. },
@@ -60,6 +46,6 @@ scene.add( sphere );
 export function renderScreen() {
 
 	renderer.setRenderTarget( null );
-	renderScene();
+	renderer.render( scene, camera );
 }
 

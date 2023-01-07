@@ -17,7 +17,6 @@ export const atmosphereLightBuffers = [
 
 // create scene and setup sky to render
 const scene = new THREE.Scene();
-const renderScene = () => renderer.render(scene, camera);
 
 const skyMaterial = new THREE.ShaderMaterial({
     vertexShader: skyVertexShader,
@@ -43,7 +42,7 @@ export function renderAtmosphereLight() {
 
 	renderer.setRenderTarget( activeAtmosphereLightBuffer );
 	skyUniforms.uAtmosphereLight.value = inactiveAtmosphereLightBuffer.texture;
-	renderScene();
+	renderer.render( scene, camera );
 	skyUniforms.uAtmosphereLight.value = activeAtmosphereLightBuffer.texture;
 }
 
