@@ -24,10 +24,9 @@ varying vec3 vNormal;
 #define MOON_RADIUS 1737e+3 
 #define EARTH_RADIUS 6360e+3
 #define EARTH_CENTRE vec3(0,-EARTH_RADIUS,0)
-#define ATMOSPHERE_RADIUS 6460e+3
+#define ATMOSPHERE_RADIUS 6400e+3 //6460e+3
 #define VIEWER_HEIGHT 2.
 
-#define NSAMPLES 2
 #define RAYLEIGH_SCATTERING_COEFFS vec3(5.802, 13.6, 33.1)   * 1e-6
 #define RAYLEIGH_ABSORPTION_COEFFS vec3(0.)                  * 1e-6
 #define MIE_SCATTERING_COEFFS      vec3(3.996)               * 1e-6

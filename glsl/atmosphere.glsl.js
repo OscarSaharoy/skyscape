@@ -3,6 +3,8 @@
 
 export default `
 
+#define NSAMPLES 7
+
 vec3 atmosphereNoise( vec3 viewDir ) {
 
 	return vec3(
@@ -11,6 +13,18 @@ vec3 atmosphereNoise( vec3 viewDir ) {
 }
 
 
+float mie( vec3 point ) {
+
+    float heightAboveSurface = 
+        length(point - EARTH_CENTRE) - EARTH_RADIUS;
+    float mieDensity = 
+        exp( -heightAboveSurface / 1200. );
+	if( heightAboveSurface > 4e+3 && false )
+		mieDensity += pow(threenoise(point * 4e-4), 60.) * 1e+5;
+
+	return mieDensity;
+}
+
 vec3 extinction( vec3 point ) {
 
     float heightAboveSurface = 
@@ -18,8 +32,7 @@ vec3 extinction( vec3 point ) {
 
     float rayleighDensity = 
         exp( - heightAboveSurface / 8000. );
-    float mieDensity = 
-        exp( -heightAboveSurface / 1200. );
+    float mieDensity = mie( point );
     float ozoneDensity = 
         max(0., 
             1. - abs(heightAboveSurface - 25e+3) 
@@ -78,8 +91,7 @@ vec3 inScatteredLightAtPoint(
         length(point - EARTH_CENTRE) - EARTH_RADIUS;
     float rayleighDensity = 
         exp( - heightAboveSurface / 8000. );
-    float mieDensity = 
-        exp( -heightAboveSurface / 1200. );
+    float mieDensity = mie( point );
 
     float cosTheta = dot(viewDir, uSunDir);
     float rayleighPhase = 
@@ -129,6 +141,10 @@ vec3 inScatteredLightAlongViewray(
 
 vec3 atmosphereLight( vec3 viewDir ) {
 
+	mediaIntersection atmosphereHit = intersectAtmosphere( vec3(0), viewDir );
+
+	return scatteredLight( vec3(0), viewDir, atmosphereHit, uSunDir );
+
 	float distThroughAtmosphere = intersectSphere(
 		vec3(0), viewDir, 
 		EARTH_CENTRE, ATMOSPHERE_RADIUS
@@ -138,10 +154,19 @@ vec3 atmosphereLight( vec3 viewDir ) {
         distThroughAtmosphere = 
             VIEWER_HEIGHT / -viewDir.y;
 
-	float hash = hash31( uSunDir + viewDir + uFramesStationary );
-	vec3 scatterPos = distThroughAtmosphere * hash * viewDir;
+	vec3 light = vec3(0);
+	float nSamples = 3.;
 
-	return inScatteredLightAtPoint( scatterPos, viewDir, vec3(0) ) * distThroughAtmosphere;
+	for( float i = 0.; i < nSamples; ++i ) {
+
+		float hash = hash11( uFramesStationary*1e-2 + i/nSamples );
+		//float hash = hash31( uSunDir + viewDir + uFramesStationary + i/nSamples );
+		vec3 scatterPos = distThroughAtmosphere * hash * viewDir;
+
+		light += inScatteredLightAtPoint( scatterPos, viewDir, vec3(0) ) * distThroughAtmosphere;
+	}
+
+	return light / nSamples;
 }
 
 `;

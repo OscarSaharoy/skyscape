@@ -42,6 +42,32 @@ vec3 random3(vec3 c) {
 	return r-0.5;
 }
 
+float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
+vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
+vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
+
+float threenoise(vec3 p){
+    vec3 a = floor(p);
+    vec3 d = p - a;
+    d = d * d * (3.0 - 2.0 * d);
+
+    vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
+    vec4 k1 = perm(b.xyxy);
+    vec4 k2 = perm(k1.xyxy + b.zzww);
+
+    vec4 c = k2 + a.zzzz;
+    vec4 k3 = perm(c);
+    vec4 k4 = perm(c + 1.0);
+
+    vec4 o1 = fract(k3 * (1.0 / 41.0));
+    vec4 o2 = fract(k4 * (1.0 / 41.0));
+
+    vec4 o3 = o2 * d.z + o1 * (1.0 - d.z);
+    vec2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
+
+    return o4.y * d.y + o4.x * (1.0 - d.y);
+}
+
 const float F3 =  0.3333333;
 const float G3 =  0.1666667;
 
@@ -162,6 +188,32 @@ float distToSphere( vec3 rayOrigin, vec3 rayDir,
 		distToClosest - closestToIntersect;
 
     return distToSphere;
+}
+
+// intersection through participating media (like atmospheres)
+struct mediaIntersection {
+	float tnear;   // first intersection
+	float tfar;    // last intersection
+};
+#define noIntersection mediaIntersection( -1., -1. )
+
+mediaIntersection intersectAtmosphere( in vec3 ro, in vec3 rd ) {
+
+	mediaIntersection res = noIntersection;
+
+	// sphere intersection
+	vec3 oc = ro - EARTH_CENTRE;
+	float b = 2. * dot(oc, rd);
+	float c = dot(oc,oc) - ATMOSPHERE_RADIUS * ATMOSPHERE_RADIUS;
+	float det = b*b - 4. * c;
+
+	if (det >= 0.) {
+
+		res.tnear = max( 0., ( -b - sqrt(det) ) / 2. );
+		res.tfar  =          ( -b + sqrt(det) ) / 2.;
+	}
+
+	return res;
 }
 
 `;

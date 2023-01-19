@@ -3,12 +3,14 @@
 import defs from "./defs.glsl.js";
 import utility from "./utility.glsl.js";
 import atmosphere from "./atmosphere.glsl.js";
+import bloodnok from "./bloodnok.glsl.js";
 
 
 export default 
 
 defs +
 utility +
+bloodnok +
 atmosphere +
 `
 
