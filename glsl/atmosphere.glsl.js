@@ -143,7 +143,7 @@ vec3 atmosphereLight( vec3 viewDir ) {
 
 	mediaIntersection atmosphereHit = intersectAtmosphere( vec3(0), viewDir );
 
-	return scatteredLight( vec3(0), viewDir, atmosphereHit, uSunDir );
+	return scatteredLight( vec3(0), viewDir, atmosphereHit );
 
 	float distThroughAtmosphere = intersectSphere(
 		vec3(0), viewDir, 

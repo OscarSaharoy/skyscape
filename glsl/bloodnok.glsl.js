@@ -121,7 +121,7 @@ float rayleighDensity( in vec3 pos ) {
 }
 
 float cloudDensity( in vec3 pos ) {
-
+return 0.;
 	return 0.000001*max( 0., fbm(pos*1e-4) - 0.8 );
 }
 
@@ -129,7 +129,7 @@ vec3 attenuationToSun( in vec3 apos ) {
 
 	// do another raycast towards the sun
 	float tsun = intersectAtmosphere( apos, uSunDir ).tfar; // cast ray to sun, intersect with inner edge of sphere
-	float dtl  = tsun * 0.12; // keep it rather chunky, don't want to bog down
+	float dtl  = tsun * 0.3; // keep it rather chunky, don't want to bog down
 
 	float rayleighToSun = 0.0;
 	float mieToSun      = 0.0;
@@ -154,11 +154,11 @@ vec3 attenuationToSun( in vec3 apos ) {
 }
 
 
-vec3 scatteredLight( in vec3 ro, in vec3 rd, in mediaIntersection hit, in vec3 sunDir ) {
-
+vec3 scatteredLight( in vec3 ro, in vec3 rd, in mediaIntersection hit ) {
+	
 	vec3 light = vec3(0);
 
-	hit.tnear += hash( hit.tnear*100. )*0.1;
+	//hit.tnear += hash( hit.tnear*100. )*0.1;
 	vec3 pos = ro + hit.tnear * rd;	//hit position
 
 	// step through atmosphere, cast rays to lightsource to determine shadow.

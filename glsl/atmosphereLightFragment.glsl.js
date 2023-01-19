@@ -22,7 +22,7 @@ void main() {
     light += atmosphereLight( viewDir );
 	light += texture2D( uAtmosphereLight, gl_FragCoord.xy/uResolution ).xyz * step( 0.5, uFramesStationary );
 
-	gl_FragColor = vec4( light, 1. );
+	gl_FragColor = vec4( max( vec3(0), light ), 1. );
 }
 
 `;
