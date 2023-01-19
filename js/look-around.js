@@ -81,7 +81,8 @@ function onPointerup( event ) {
 function onWheel( event ) {
 
 	event.preventDefault();
-    zoomCamera( camera, -event.deltaY / 200, getRelativePointerPos(event) ); 
+	skyUniforms.uFramesStationary.value = 0;
+    zoomCamera( -event.deltaY / 200 ); 
 }
 
 
