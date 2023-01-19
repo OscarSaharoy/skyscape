@@ -20,14 +20,15 @@ const scene      = new THREE.Scene();
 scene.background = new THREE.Color( 0xb01050 );
 
 export const skyUniforms = {
-    uTime:        { value: 0. },
-	uZoom:        { value: 1. },
+    uTime: { value: 0. },
+	uZoom: { value: 1. },
 	uFramesStationary: { value: 0 },
-    uResolution:  { value: new THREE.Vector2() },
-	uSunDir:      { value: new THREE.Vector3() },
-	uMoonDir:     { value: new THREE.Vector3() },
+    uResolution: { value: new THREE.Vector2() },
+	uSunDir: { value: new THREE.Vector3() },
+	uMoonDir: { value: new THREE.Vector3() },
 	uStarsRotation: { value: new THREE.Matrix4() },
 	uAtmosphereLight: { value: null },
+	uSamplePoints: { value: 5 },
 };
 skyUniforms.uSunDir.value.set(0, -0.06, -1).normalize();
 

@@ -201,7 +201,7 @@ mediaIntersection intersectAtmosphere( in vec3 ro, in vec3 rd ) {
 
 	mediaIntersection res = noIntersection;
 
-	// sphere intersection
+	// atmosphere intersection
 	vec3 oc = ro - EARTH_CENTRE;
 	float b = 2. * dot(oc, rd);
 	float c = dot(oc,oc) - ATMOSPHERE_RADIUS * ATMOSPHERE_RADIUS;

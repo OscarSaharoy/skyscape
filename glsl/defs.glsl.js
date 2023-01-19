@@ -11,6 +11,7 @@ uniform vec3 uMoonDir;
 uniform mat4 uStarsRotation;
 uniform sampler2D uAtmosphereLight;
 uniform sampler2D uAtmosphereLightPrev;
+uniform int uSamplePoints;
 
 varying vec3 vNormal;
 

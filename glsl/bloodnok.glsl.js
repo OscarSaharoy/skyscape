@@ -121,8 +121,7 @@ float rayleighDensity( in vec3 pos ) {
 }
 
 float cloudDensity( in vec3 pos ) {
-return 0.;
-	return 0.000001*max( 0., fbm(pos*1e-4) - 0.8 );
+	return 0.00001*max( 0., fbm(pos*1e-5) - 0.8 );
 }
 
 vec3 attenuationToSun( in vec3 apos ) {
@@ -162,7 +161,7 @@ vec3 scatteredLight( in vec3 ro, in vec3 rd, in mediaIntersection hit ) {
 	vec3 pos = ro + hit.tnear * rd;	//hit position
 
 	// step through atmosphere, cast rays to lightsource to determine shadow.
-	float dt = (hit.tfar - hit.tnear) * 0.12;
+	float dt = (hit.tfar - hit.tnear) / float(uSamplePoints);
 	
 	// raymarch through sphere:
 	// - calculate cumulative absorption
@@ -173,8 +172,10 @@ vec3 scatteredLight( in vec3 ro, in vec3 rd, in mediaIntersection hit ) {
 	float rayleighMass = 0.0;
 	float cloudMass = 0.0;
 
-	for(float t = hit.tnear + dt/2.; t<hit.tfar; t+=dt){
-	
+	float t = hit.tnear;
+	for( int i = 0; i < uSamplePoints; ++i ) {
+
+		t = hit.tnear + dt * (float(i) + hash(uFramesStationary + float(i)));
 		vec3 apos = ro + rd * t; // position along atmosphere ray
 						
 		float stepMieDensity = mieDensity(apos) * dt;
