@@ -175,7 +175,7 @@ vec3 scatteredLight( in vec3 ro, in vec3 rd, in mediaIntersection hit ) {
 	float t = hit.tnear;
 	for( int i = 0; i < uSamplePoints; ++i ) {
 
-		t = hit.tnear + dt * (float(i) + hash(uFramesStationary + float(i)));
+		t = hit.tnear + dt * (float(i) + hash(uFramesStationary + float(i) + hit.tfar*1e-4));
 		vec3 apos = ro + rd * t; // position along atmosphere ray
 						
 		float stepMieDensity = mieDensity(apos) * dt;
