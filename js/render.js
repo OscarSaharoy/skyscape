@@ -1,12 +1,13 @@
 // Oscar Saharoy 2023
 
-import { renderScreen } from "./screen.js";
-import { renderAtmosphereLight } from "./atmosphere-light.js";
+import "./resize.js";
+import "./look-around.js";
 import { camera } from "./camera.js";
 import { renderer } from "./renderer.js";
 import { uniforms } from "./uniforms.js";
-import "./look-around.js";
-import "./resize.js";
+import { renderScreen } from "./screen.js";
+import { renderAtmosphereLight } from "./atmosphere-light.js";
+
 
 // Todo
 // need to implement ray marching
