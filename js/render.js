@@ -4,6 +4,8 @@ import { skyUniforms, renderScreen } from "./skyscape.js";
 import { renderAtmosphereLight } from "./atmosphere-light.js";
 import { camera } from "./camera.js";
 import { renderer } from "./renderer.js";
+import "./look-around.js";
+import "./resize.js";
 
 
 
