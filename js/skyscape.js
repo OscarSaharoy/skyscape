@@ -1,7 +1,7 @@
 // Oscar Saharoy 2022
 
 // divert errors to alerts so we can debug on mobile easier
-window.onerror = error => alert(error);
+//window.onerror = error => alert(error);
 
 import * as THREE from './three.module.js'; 
 import vertexShader from "../glsl/vertex.glsl.js";
