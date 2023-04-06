@@ -1,8 +1,10 @@
 // Oscar Saharoy 2023
 
-import { skyUniforms, renderer, renderScreen } from "./skyscape.js";
+import { skyUniforms, renderScreen } from "./skyscape.js";
 import { renderAtmosphereLight } from "./atmosphere-light.js";
 import { camera } from "./camera.js";
+import { renderer } from "./renderer.js";
+
 
 
 // render loop
@@ -12,5 +14,5 @@ import { camera } from "./camera.js";
 	if( skyUniforms.uFramesStationary.value >= 5 ) return;
 
 	renderAtmosphereLight( renderer, camera );
-	renderScreen();
+	renderScreen( renderer, camera );
 } )();

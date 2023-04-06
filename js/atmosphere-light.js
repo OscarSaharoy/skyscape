@@ -1,7 +1,8 @@
 // Oscar Saharoy 2022
 
 import * as THREE from './three.module.js'; 
-import { skyUniforms, floatType } from "./skyscape.js";
+import { skyUniforms } from "./skyscape.js";
+import { floatType } from "./renderer.js";
 
 import vertexShader from "../glsl/vertex.glsl.js";
 import atmosphereLightFragmentShader from "../glsl/atmosphereLightFragment.glsl.js";

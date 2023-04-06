@@ -1,8 +1,9 @@
 // Oscar Saharoy 2023
 
-import { skyUniforms, renderer } from "./skyscape.js";
+import { skyUniforms } from "./skyscape.js";
 import { canvas } from "./canvas.js";
 import { camera } from "./camera.js";
+import { renderer } from "./renderer.js";
 import { atmosphereLightBuffers } from "./atmosphere-light.js";
 
 

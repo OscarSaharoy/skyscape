@@ -13,9 +13,6 @@ import { camera } from "./camera.js";
 //need to implement ray marching
 //need to implment dual scattering approximation style thing
 
-export const renderer = new THREE.WebGLRenderer( {canvas: canvas, antialias: true, precision: 'highp'} );
-export const floatType = renderer.capabilities.isWebGL2 ? THREE.FloatType : THREE.HalfFloatType;
-
 const scene      = new THREE.Scene();
 scene.background = new THREE.Color( 0xb01050 );
 
@@ -45,7 +42,7 @@ const sphere   = new THREE.Mesh( geometry, skyMaterial );
 scene.add( sphere );
 
 
-export function renderScreen() {
+export function renderScreen( renderer, camera ) {
 
 	renderer.setRenderTarget( null );
 	renderer.render( scene, camera );
