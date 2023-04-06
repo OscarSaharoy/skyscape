@@ -1,6 +1,6 @@
 // Oscar Saharoy 2023
 
-import { renderScreen } from "./skyscape.js";
+import { renderScreen } from "./screen.js";
 import { renderAtmosphereLight } from "./atmosphere-light.js";
 import { camera } from "./camera.js";
 import { renderer } from "./renderer.js";
