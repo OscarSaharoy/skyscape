@@ -9,9 +9,6 @@ import skyFragmentShader from "../glsl/skyFragment.glsl.js";
 import { uniforms } from "./uniforms.js";
 
 
-//need to implement ray marching
-//need to implment dual scattering approximation style thing
-
 const scene      = new THREE.Scene();
 scene.background = new THREE.Color( 0xb01050 );
 

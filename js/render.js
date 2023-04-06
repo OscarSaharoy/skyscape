@@ -8,6 +8,9 @@ import { uniforms } from "./uniforms.js";
 import "./look-around.js";
 import "./resize.js";
 
+// Todo
+// need to implement ray marching
+// need to implment dual scattering approximation style thing
 
 
 // render loop
