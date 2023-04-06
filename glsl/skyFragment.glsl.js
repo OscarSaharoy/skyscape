@@ -32,6 +32,10 @@ void main() {
 	light += sunLight( viewDir );
 
     light += texture2D(uAtmosphereLight, gl_FragCoord.xy/uResolution).xyz / (uFramesStationary + 1.);
+	
+	// reinhardt HDR tonemapping
+    float whitelevel = 5.;
+    light = ( light * (vec3(1.0) + (light / (whitelevel * whitelevel)) ) ) / (vec3(1.0) + light);
 
 	// gamma correction
     light = pow(light , vec3(1. / 2.2));

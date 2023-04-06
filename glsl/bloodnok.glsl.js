@@ -106,6 +106,27 @@ float phase(float alpha, float g) {
 	return (a/b)*(c/d);
 }
 
+
+vec4 mediaDensity( in vec3 pos ) {
+
+	// returns a vec4 of the rayleigh, mie, cloud and ozone densities at a given point
+	vec4 res = vec4(0);
+
+    float heightAboveSurface = 
+        length(pos - EARTH_CENTRE) - EARTH_RADIUS;
+
+    res[0] = exp( - heightAboveSurface / 8000. ); // rayleigh
+    res[1] = exp( - heightAboveSurface / 1200. ); // mie
+
+	float lowGap = smoothstep( 0., 1., heightAboveSurface / 1000. );
+	float highClip = smoothstep( 0., 1., (15000. - heightAboveSurface) / 1000. );
+
+	res[2] = ( fbm(pos*5e-5) - 1.2 ) * lowGap * highClip; // cloud
+	res[3] = max(0., 1. - abs(heightAboveSurface - 25e+3) / 15e+3 ); // ozone
+
+	return res;
+}
+
 float mieDensity( in vec3 pos ) {
 
     float heightAboveSurface = 
@@ -128,28 +149,29 @@ float cloudDensity( in vec3 pos ) {
 	float lowGap = smoothstep( 0., 1., heightAboveSurface / 1000. );
 	float highClip = smoothstep( 0., 1., (15000. - heightAboveSurface) / 1000. );
 
-	return 0.00001*max( 0., fbm(pos*5e-5) - 1.2 ) * lowGap * highClip;
+	return 1e-5*( fbm(pos*5e-5) - 1.2 );// * lowGap * highClip;
 }
 
 vec3 attenuationToSun( in vec3 apos ) {
 
 	int nSamples = 4;
 	mediaIntersection hit = intersectAtmosphere( apos, uSunDir ); // cast ray to sun, intersect with inner edge of sphere
-	float dtl = ( hit.tfar - hit.tnear ) / float(nSamples); // keep it rather chunky, don't want to bog down
+	float dtl = 0.;//( hit.tfar - hit.tnear ) / float(nSamples); // keep it rather chunky, don't want to bog down
 
 	float rayleighToSun = 0.0;
 	float mieToSun      = 0.0;
 	float cloudToSun    = 0.0;
 
-	float tl = 0.;
-	for( int i = 0; i < nSamples; ++i ) {
-
-		float tl = hit.tnear + dtl * ( float(i) + hash(uFramesStationary) );
+	for( float tl = hit.tnear; tl < hit.tfar; tl += dtl ) {
+		
 		vec3 spos = apos + uSunDir * tl;
 
+		float cloudDensityAtSpos = cloudDensity( spos );
+		dtl = (hit.tfar - hit.tnear) * clamp( 0.2 - 0.2 * cloudDensityAtSpos*10000., 0.001, 1. );
+		cloudDensityAtSpos = max( 0., cloudDensityAtSpos );
 		mieToSun      += mieDensity(spos)      * dtl;  // acumulate mie density
 		rayleighToSun += rayleighDensity(spos) * dtl;
-		cloudToSun    += cloudDensity(spos)    * dtl;  // acumulate cloud density
+		cloudToSun    += cloudDensityAtSpos    * dtl;  // acumulate cloud density
 	}
 
 	return exp( -(
@@ -170,7 +192,7 @@ vec3 scatteredLight( in vec3 ro, in vec3 rd, in mediaIntersection hit ) {
 	vec3 pos = ro + hit.tnear * rd;	//hit position
 
 	// step through atmosphere, cast rays to lightsource to determine shadow.
-	float dt = (hit.tfar - hit.tnear) / float(uSamplePointsPerFrame);
+	float dt = 0.;//(hit.tfar - hit.tnear) / float(uSamplePointsPerFrame);
 	
 	// raymarch through sphere:
 	// - calculate cumulative absorption
@@ -193,7 +215,10 @@ vec3 scatteredLight( in vec3 ro, in vec3 rd, in mediaIntersection hit ) {
 		float stepRayleighDensity = rayleighDensity(apos) * dt;
 		rayleighMass += stepRayleighDensity; // total rayliegh density from viewer to point
 
-		float stepCloudDensity = cloudDensity(apos) * dt;
+		float cloudDensityAtApos = cloudDensity( apos );
+		dt = (hit.tfar - hit.tnear) * clamp( 0.2 - 0.2 * cloudDensityAtApos*1000., 0.001, 1. );
+		cloudDensityAtApos = max( 0., cloudDensityAtApos );
+		float stepCloudDensity = cloudDensityAtApos * dt;
 		cloudMass += stepCloudDensity; // total cloud density from viewer to point
 		
 		vec3 mieScatterFactors =
