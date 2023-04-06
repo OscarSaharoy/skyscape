@@ -47,7 +47,7 @@ function onPointerdown( event ) {
     activePointers[event.pointerId] = getRelativePointerPos( event );
 
 	if( Object.keys(activePointers).length == 1
-			&& pointerOverSun(camera, event) )
+			&& pointerOverSun( event, camera, uniforms ) )
 		draggingSun = true;
     
     prevMeanPointer = getMeanPointerPos( activePointers );
@@ -97,7 +97,7 @@ function controlsLoop() {
 
 
 	if( draggingSun )
-		setSunDirection( camera, getMeanPointerPos( activePointers ) );
+		setSunDirection( getMeanPointerPos( activePointers ), canvas, camera, uniforms );
 
 	else {
 		const meanDelta = getMeanPointerPos( activePointers ).sub( prevMeanPointer );

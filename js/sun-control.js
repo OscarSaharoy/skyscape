@@ -1,11 +1,9 @@
 // Oscar Saharoy 2022
 
 import * as THREE from "./three.module.js"; 
-import { uniforms } from "./uniforms.js";
-import { canvas } from "./canvas.js";
 
 
-export function pointerOverSun( camera, event ) {
+export function pointerOverSun( event, camera, uniforms ) {
 
 	// get the canvas bounding box to find the pointer's location in clip space
     const canvasBox = canvas.getBoundingClientRect();
@@ -21,7 +19,7 @@ export function pointerOverSun( camera, event ) {
 	return direction.dot( uniforms.uSunDir.value ) > 0.99999 - paddingScaleFactor * 0.0005;
 }
 
-export function setSunDirection( camera, meanRelativePointer ) {
+export function setSunDirection( meanRelativePointer, canvas, camera, uniforms ) {
 
     const canvasBox = canvas.getBoundingClientRect();
     const clipX  = meanRelativePointer.x * 2 * Math.max(canvasBox.width, canvasBox.height) / canvasBox.width;
