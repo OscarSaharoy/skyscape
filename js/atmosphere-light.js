@@ -1,12 +1,11 @@
 // Oscar Saharoy 2022
 
 import * as THREE from './three.module.js'; 
+import { skyUniforms, floatType } from "./skyscape.js";
+
 import vertexShader from "../glsl/vertex.glsl.js";
 import atmosphereLightFragmentShader from "../glsl/atmosphereLightFragment.glsl.js";
-import { skyUniforms, renderer } from "./skyscape.js";
-import { camera } from "./camera.js";
 
-const floatType = renderer.capabilities.isWebGL2 ? THREE.FloatType : THREE.HalfFloatType;
 
 // setup 2 alternating render targets
 export const atmosphereLightBuffers = [
@@ -16,22 +15,21 @@ export const atmosphereLightBuffers = [
 
 
 // create scene and setup sky to render
-const scene = new THREE.Scene();
+const atmosphereLightScene = new THREE.Scene();
 
-const skyMaterial = new THREE.ShaderMaterial({
+const atmosphereLightMaterial = new THREE.ShaderMaterial({
     vertexShader: vertexShader,
     fragmentShader: atmosphereLightFragmentShader,
 	uniforms: skyUniforms,
     side: THREE.BackSide,
 });
 
-const geometry = new THREE.IcosahedronGeometry( 1, 3 );
-const material = skyMaterial; 
-const sphere   = new THREE.Mesh( geometry, material );
-scene.add( sphere );
+const atmosphereLightGeometry = new THREE.IcosahedronGeometry( 1, 3 );
+const atmosphereLightMesh = new THREE.Mesh( atmosphereLightGeometry, atmosphereLightMaterial );
+atmosphereLightScene.add( atmosphereLightMesh );
 
 
-export function renderAtmosphereLight() {
+export function renderAtmosphereLight( renderer, camera ) {
 
 	// alternate rendering between the two atmospherelight buffers to allow shader to use output of previous render step
 	// (ping pong rendering)
@@ -42,7 +40,7 @@ export function renderAtmosphereLight() {
 
 	renderer.setRenderTarget( activeAtmosphereLightBuffer );
 	skyUniforms.uAtmosphereLight.value = inactiveAtmosphereLightBuffer.texture;
-	renderer.render( scene, camera );
+	renderer.render( atmosphereLightScene, camera );
 	skyUniforms.uAtmosphereLight.value = activeAtmosphereLightBuffer.texture;
 }
 

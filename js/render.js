@@ -2,6 +2,7 @@
 
 import { skyUniforms, renderer, renderScreen } from "./skyscape.js";
 import { renderAtmosphereLight } from "./atmosphere-light.js";
+import { camera } from "./camera.js";
 
 
 // render loop
@@ -10,6 +11,6 @@ import { renderAtmosphereLight } from "./atmosphere-light.js";
 
 	if( skyUniforms.uFramesStationary.value >= 5 ) return;
 
-	renderAtmosphereLight();
+	renderAtmosphereLight( renderer, camera );
 	renderScreen();
 } )();

@@ -14,6 +14,7 @@ import { camera } from "./camera.js";
 //need to implment dual scattering approximation style thing
 
 export const renderer = new THREE.WebGLRenderer( {canvas: canvas, antialias: true, precision: 'highp'} );
+export const floatType = renderer.capabilities.isWebGL2 ? THREE.FloatType : THREE.HalfFloatType;
 
 const scene      = new THREE.Scene();
 scene.background = new THREE.Color( 0xb01050 );
