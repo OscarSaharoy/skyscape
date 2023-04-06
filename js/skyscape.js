@@ -4,14 +4,13 @@
 window.onerror = error => alert(error);
 
 import * as THREE from './three.module.js'; 
-import skyVertexShader from "../glsl/skyVertex.glsl.js";
+import vertexShader from "../glsl/vertex.glsl.js";
 import skyFragmentShader from "../glsl/skyFragment.glsl.js";
 import { canvas } from "./canvas.js";
 import { camera } from "./camera.js";
 
 
-//need to figure out accumulation and averaging
-//need to figure out importance sampling
+//need to implement ray marching
 //need to implment dual scattering approximation style thing
 
 export const renderer = new THREE.WebGLRenderer( {canvas: canvas, antialias: true, precision: 'highp'} );
@@ -28,12 +27,13 @@ export const skyUniforms = {
 	uMoonDir: { value: new THREE.Vector3() },
 	uStarsRotation: { value: new THREE.Matrix4() },
 	uAtmosphereLight: { value: null },
-	uSamplePoints: { value: 5 },
+	uSamplePointsPerFrame: { value: 5 },
+	uSamplePointsTotal: { value: 200 },
 };
 skyUniforms.uSunDir.value.set(0, -0.06, -1).normalize();
 
 const skyMaterial = new THREE.ShaderMaterial({
-    vertexShader: skyVertexShader,
+    vertexShader: vertexShader,
     fragmentShader: skyFragmentShader,
     uniforms: skyUniforms,
     side: THREE.BackSide,

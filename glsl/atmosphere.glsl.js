@@ -139,7 +139,7 @@ vec3 inScatteredLightAlongViewray(
 }
 
 
-vec3 atmosphereLight( vec3 viewDir ) {
+vec4 atmosphereLight( vec3 viewDir, float prevExtinction ) {
 
 	mediaIntersection atmosphereHit = intersectAtmosphere( vec3(0), viewDir );
 
@@ -147,7 +147,7 @@ vec3 atmosphereLight( vec3 viewDir ) {
         atmosphereHit.tfar = 
             VIEWER_HEIGHT / -viewDir.y;
 
-	return scatteredLight( vec3(0), viewDir, atmosphereHit );
+	return vec4( scatteredLight( vec3(0), viewDir, atmosphereHit ), 1. );
 
 	float distThroughAtmosphere = intersectSphere(
 		vec3(0), viewDir, 
@@ -170,7 +170,7 @@ vec3 atmosphereLight( vec3 viewDir ) {
 		light += inScatteredLightAtPoint( scatterPos, viewDir, vec3(0) ) * distThroughAtmosphere;
 	}
 
-	return light / nSamples;
+	return vec4( light / nSamples, 1. );
 }
 
 `;

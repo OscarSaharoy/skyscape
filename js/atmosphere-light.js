@@ -1,7 +1,7 @@
 // Oscar Saharoy 2022
 
 import * as THREE from './three.module.js'; 
-import skyVertexShader from "../glsl/skyVertex.glsl.js";
+import vertexShader from "../glsl/vertex.glsl.js";
 import atmosphereLightFragmentShader from "../glsl/atmosphereLightFragment.glsl.js";
 import { skyUniforms, renderer } from "./skyscape.js";
 import { camera } from "./camera.js";
@@ -19,7 +19,7 @@ export const atmosphereLightBuffers = [
 const scene = new THREE.Scene();
 
 const skyMaterial = new THREE.ShaderMaterial({
-    vertexShader: skyVertexShader,
+    vertexShader: vertexShader,
     fragmentShader: atmosphereLightFragmentShader,
 	uniforms: skyUniforms,
     side: THREE.BackSide,

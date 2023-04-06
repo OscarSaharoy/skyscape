@@ -121,21 +121,30 @@ float rayleighDensity( in vec3 pos ) {
 }
 
 float cloudDensity( in vec3 pos ) {
-	return 0.00001*max( 0., fbm(pos*1e-5) - 0.8 );
+
+    float heightAboveSurface = 
+        length(pos - EARTH_CENTRE) - EARTH_RADIUS;
+	
+	float lowGap = smoothstep( 0., 1., heightAboveSurface / 1000. );
+	float highClip = smoothstep( 0., 1., (15000. - heightAboveSurface) / 1000. );
+
+	return 0.00001*max( 0., fbm(pos*5e-5) - 1.2 ) * lowGap * highClip;
 }
 
 vec3 attenuationToSun( in vec3 apos ) {
 
-	// do another raycast towards the sun
-	float tsun = intersectAtmosphere( apos, uSunDir ).tfar; // cast ray to sun, intersect with inner edge of sphere
-	float dtl  = tsun * 0.3; // keep it rather chunky, don't want to bog down
+	int nSamples = 4;
+	mediaIntersection hit = intersectAtmosphere( apos, uSunDir ); // cast ray to sun, intersect with inner edge of sphere
+	float dtl = ( hit.tfar - hit.tnear ) / float(nSamples); // keep it rather chunky, don't want to bog down
 
 	float rayleighToSun = 0.0;
 	float mieToSun      = 0.0;
 	float cloudToSun    = 0.0;
 
-	for (float tl = 0.; tl < tsun; tl += dtl) {
-		
+	float tl = 0.;
+	for( int i = 0; i < nSamples; ++i ) {
+
+		float tl = hit.tnear + dtl * ( float(i) + hash(uFramesStationary) );
 		vec3 spos = apos + uSunDir * tl;
 
 		mieToSun      += mieDensity(spos)      * dtl;  // acumulate mie density
@@ -161,7 +170,7 @@ vec3 scatteredLight( in vec3 ro, in vec3 rd, in mediaIntersection hit ) {
 	vec3 pos = ro + hit.tnear * rd;	//hit position
 
 	// step through atmosphere, cast rays to lightsource to determine shadow.
-	float dt = (hit.tfar - hit.tnear) / float(uSamplePoints);
+	float dt = (hit.tfar - hit.tnear) / float(uSamplePointsPerFrame);
 	
 	// raymarch through sphere:
 	// - calculate cumulative absorption
@@ -173,9 +182,9 @@ vec3 scatteredLight( in vec3 ro, in vec3 rd, in mediaIntersection hit ) {
 	float cloudMass = 0.0;
 
 	float t = hit.tnear;
-	for( int i = 0; i < uSamplePoints; ++i ) {
+	for( int i = 0; i < uSamplePointsPerFrame; ++i ) {
 
-		t = hit.tnear + dt * (float(i) + hash(uFramesStationary + float(i) + hit.tfar*1e-4));
+		t = hit.tnear + dt * (float(i) + hash(uFramesStationary) );
 		vec3 apos = ro + rd * t; // position along atmosphere ray
 						
 		float stepMieDensity = mieDensity(apos) * dt;
@@ -216,42 +225,16 @@ vec3 scatteredLight( in vec3 ro, in vec3 rd, in mediaIntersection hit ) {
 		//light += mie_eye * influx * attenuationToViewer;
 	}
 
-	return light;
+	return max( vec3(0), light );
 }
 
 
-/*
-void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
+vec4 lightAndExtinction( vec3 viewDir, float prevExtinction ) {
 
-	vec2 p = ( fragCoord.xy - iResolution.xy * .5 )
-		/ min(iResolution.x, iResolution.y) * 2.;
+	// get start and end t values for ray through atmosphere
+	mediaIntersection atmosphereHit = intersectAtmosphere( vec3(0), viewDir );
 
-	vec3 ro = 2. * vec3(-cos(uTime*0.5), 0., sin(uTime*0.5));
-
-	vec3 lookAt = sph1.xyz;
-	vec3 front = normalize(lookAt - ro);
-	vec3 left = normalize(cross(vec3(0,1,0), front));
-	vec3 up = normalize(cross(front, left));
-
-	vec3 rd = normalize(front*1.5 + left*p.x + up*p.y); // view dir
-	vec3 lightDir = normalize(vec3(1));
-	lightDir = normalize(vec3(.75,.25,0.25));
-	
-	vec3 light = vec3(0.0);
-	mediaIntersection hit = mSphere(ro,rd,sph1);
-
-	if (hit.tnear > 0.0)
-		light += scatteredLight( ro, rd, hit, lightDir );
-
-	// reinhardt HDR tonemapping
-	float whitelevel = 5.;
-	light = (light * (vec3(1.0) + (light / (whitelevel * whitelevel))  ) ) / (vec3(1.0) + light);	
-
-	// gamma	
-	light = pow(light,vec3(1.0/2.0));
-	
-	fragColor = vec4(light,1.0);
+	return vec4( scatteredLight( vec3(0), viewDir, atmosphereHit ), 1. );
 }
-*/
 
 `

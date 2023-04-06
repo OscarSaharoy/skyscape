@@ -8,7 +8,7 @@ import { renderAtmosphereLight } from "./atmosphere-light.js";
 ( function renderLoop() {
 	requestAnimationFrame( renderLoop );
 
-	if( skyUniforms.uFramesStationary.value >= 50 ) return;
+	if( skyUniforms.uFramesStationary.value >= 5 ) return;
 
 	renderAtmosphereLight();
 	renderScreen();
