@@ -6,8 +6,6 @@
 import * as THREE from './three.module.js'; 
 import vertexShader from "../glsl/vertex.glsl.js";
 import skyFragmentShader from "../glsl/skyFragment.glsl.js";
-import { canvas } from "./canvas.js";
-import { camera } from "./camera.js";
 
 
 //need to implement ray marching
