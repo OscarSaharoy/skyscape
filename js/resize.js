@@ -1,6 +1,6 @@
 // Oscar Saharoy 2023
 
-import { skyUniforms } from "./skyscape.js";
+import { uniforms } from "./uniforms.js";
 import { canvas } from "./canvas.js";
 import { camera } from "./camera.js";
 import { renderer } from "./renderer.js";
@@ -19,14 +19,14 @@ function resize() {
 	atmosphereLightBuffers.forEach( buffer => 
 		buffer.setSize( width*dpr, height*dpr ) );
 
-    skyUniforms.uResolution.value.set( width*dpr, height*dpr );
+    uniforms.uResolution.value.set( width*dpr, height*dpr );
 
     const aspect = canvas.width / canvas.height;
     camera.aspect = aspect;
     camera.fov = Math.min( 60 * Math.max( 1, 1/aspect ), 100 );
     camera.updateProjectionMatrix();
 
-	skyUniforms.uFramesStationary.value = 0;
+	uniforms.uFramesStationary.value = 0;
 }
 
 new ResizeObserver( resize ).observe( canvas );

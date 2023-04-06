@@ -1,7 +1,7 @@
 // Oscar Saharoy 2022
 
 import * as THREE from './three.module.js'; 
-import { skyUniforms } from "./skyscape.js";
+import { uniforms } from "./uniforms.js";
 import { floatType } from "./renderer.js";
 
 import vertexShader from "../glsl/vertex.glsl.js";
@@ -21,7 +21,7 @@ const atmosphereLightScene = new THREE.Scene();
 const atmosphereLightMaterial = new THREE.ShaderMaterial({
     vertexShader: vertexShader,
     fragmentShader: atmosphereLightFragmentShader,
-	uniforms: skyUniforms,
+	uniforms: uniforms,
     side: THREE.BackSide,
 });
 
@@ -35,13 +35,13 @@ export function renderAtmosphereLight( renderer, camera ) {
 	// alternate rendering between the two atmospherelight buffers to allow shader to use output of previous render step
 	// (ping pong rendering)
 	const activeAtmosphereLightBuffer = 
-		atmosphereLightBuffers[ skyUniforms.uFramesStationary.value % 2 ];
+		atmosphereLightBuffers[ uniforms.uFramesStationary.value % 2 ];
 	const inactiveAtmosphereLightBuffer = 
-		atmosphereLightBuffers[ ( skyUniforms.uFramesStationary.value + 1 ) % 2 ];
+		atmosphereLightBuffers[ ( uniforms.uFramesStationary.value + 1 ) % 2 ];
 
 	renderer.setRenderTarget( activeAtmosphereLightBuffer );
-	skyUniforms.uAtmosphereLight.value = inactiveAtmosphereLightBuffer.texture;
+	uniforms.uAtmosphereLight.value = inactiveAtmosphereLightBuffer.texture;
 	renderer.render( atmosphereLightScene, camera );
-	skyUniforms.uAtmosphereLight.value = activeAtmosphereLightBuffer.texture;
+	uniforms.uAtmosphereLight.value = activeAtmosphereLightBuffer.texture;
 }
 

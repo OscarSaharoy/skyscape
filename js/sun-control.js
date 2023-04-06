@@ -1,7 +1,7 @@
 // Oscar Saharoy 2022
 
 import * as THREE from "./three.module.js"; 
-import { skyUniforms } from "./skyscape.js";
+import { uniforms } from "./uniforms.js";
 import { canvas } from "./canvas.js";
 
 
@@ -18,7 +18,7 @@ export function pointerOverSun( camera, event ) {
 
 	// calculate whether the pointer is close enough to the sun adjusting for zoom
 	const paddingScaleFactor = camera.getEffectiveFOV() / camera.fov;
-	return direction.dot( skyUniforms.uSunDir.value ) > 0.99999 - paddingScaleFactor * 0.0005;
+	return direction.dot( uniforms.uSunDir.value ) > 0.99999 - paddingScaleFactor * 0.0005;
 }
 
 export function setSunDirection( camera, meanRelativePointer ) {
@@ -29,6 +29,6 @@ export function setSunDirection( camera, meanRelativePointer ) {
 
 	// set the sun direction to match the pointer location
     const clipVec = new THREE.Vector3( clipX, clipY, 0 );
-	skyUniforms.uSunDir.value = clipVec.unproject( camera ).normalize();
+	uniforms.uSunDir.value = clipVec.unproject( camera ).normalize();
 }
 

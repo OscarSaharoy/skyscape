@@ -6,6 +6,7 @@
 import * as THREE from './three.module.js'; 
 import vertexShader from "../glsl/vertex.glsl.js";
 import skyFragmentShader from "../glsl/skyFragment.glsl.js";
+import { uniforms } from "./uniforms.js";
 
 
 //need to implement ray marching
@@ -14,24 +15,10 @@ import skyFragmentShader from "../glsl/skyFragment.glsl.js";
 const scene      = new THREE.Scene();
 scene.background = new THREE.Color( 0xb01050 );
 
-export const skyUniforms = {
-    uTime: { value: 0. },
-	uZoom: { value: 1. },
-	uFramesStationary: { value: 0 },
-    uResolution: { value: new THREE.Vector2() },
-	uSunDir: { value: new THREE.Vector3() },
-	uMoonDir: { value: new THREE.Vector3() },
-	uStarsRotation: { value: new THREE.Matrix4() },
-	uAtmosphereLight: { value: null },
-	uSamplePointsPerFrame: { value: 5 },
-	uSamplePointsTotal: { value: 200 },
-};
-skyUniforms.uSunDir.value.set(0, -0.06, -1).normalize();
-
 const skyMaterial = new THREE.ShaderMaterial({
     vertexShader: vertexShader,
     fragmentShader: skyFragmentShader,
-    uniforms: skyUniforms,
+    uniforms: uniforms,
     side: THREE.BackSide,
 });
 

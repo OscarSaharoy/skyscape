@@ -3,7 +3,7 @@
 import * as THREE from "./three.module.js"; 
 import { canvas } from "./canvas.js";
 import { camera, panCamera, zoomCamera } from "./camera.js";
-import { skyUniforms } from "./skyscape.js";
+import { uniforms } from "./uniforms.js";
 import { pointerOverSun, setSunDirection } from "./sun-control.js";
 
 
@@ -81,7 +81,7 @@ function onPointerup( event ) {
 function onWheel( event ) {
 
 	event.preventDefault();
-	skyUniforms.uFramesStationary.value = 0;
+	uniforms.uFramesStationary.value = 0;
     zoomCamera( -event.deltaY / 200 ); 
 }
 
@@ -91,9 +91,9 @@ function controlsLoop() {
     requestAnimationFrame( controlsLoop );
 
     if( !Object.keys(activePointers).length ) 
-		return ++skyUniforms.uFramesStationary.value;
+		return ++uniforms.uFramesStationary.value;
 
-	else skyUniforms.uFramesStationary.value = 0;
+	else uniforms.uFramesStationary.value = 0;
 
 
 	if( draggingSun )
@@ -107,7 +107,7 @@ function controlsLoop() {
 		const spreadDelta = getPointerSpread( activePointers ) - prevPointerSpread;
 		prevPointerSpread = getPointerSpread( activePointers );
 		zoomCamera( spreadDelta * 40 );
-		skyUniforms.uZoom.value = camera.zoom;
+		uniforms.uZoom.value = camera.zoom;
 	}
 }
 controlsLoop();
