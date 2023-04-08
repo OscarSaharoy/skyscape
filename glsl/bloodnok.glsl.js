@@ -136,12 +136,6 @@ float cloudDensity( in vec3 pos ) {
 
 vec4 atmosphereComp( in vec3 pos ) {
 
-	return vec4(
-		rayleighDensity( pos ),
-		mieDensity( pos ),
-		cloudDensity( pos ),
-		0.//ozoneDensity( pos )
-	);
 
 	// returns a vec4 of the rayleigh, mie, cloud and ozone densities at a given point
 	vec4 res = vec4(0);
@@ -155,7 +149,7 @@ vec4 atmosphereComp( in vec3 pos ) {
 	float lowGap = smoothstep( 0., 1., heightAboveSurface / 1000. );
 	float highClip = smoothstep( 0., 1., (15000. - heightAboveSurface) / 1000. );
 
-	res[2] = ( fbm(pos*5e-5) - 1.2 ) * lowGap * highClip; // cloud
+	res[2] = 1e-5 * ( fbm(pos*5e-5) - 1.2 );// * lowGap * highClip; // cloud
 	res[3] = max(0., 1. - abs(heightAboveSurface - 25e+3) / 15e+3 ); // ozone
 
 	return res;
