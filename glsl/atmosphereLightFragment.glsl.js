@@ -16,13 +16,13 @@ void main() {
 
     vec3 viewDir = normalize(vNormal);
 
-	vec4 prevLightAndExtinction = texture2D( uAtmosphereLight, gl_FragCoord.xy/uResolution );
+	vec4 prevLight = texture2D( uAtmosphereLight, gl_FragCoord.xy/uResolution );
 
 	float addToPrev = step( 0.5, uFramesStationary );
 
 	gl_FragColor = 
-		lightAndExtinction( viewDir, prevLightAndExtinction.w )
-		+ prevLightAndExtinction * addToPrev;
+		vec4( inScatteredLight( viewDir ), 1. )
+		+ prevLight * addToPrev;
 }
 
 `;

@@ -180,12 +180,15 @@ vec3 attenuationToSun( in vec3 apos ) {
 }
 
 
-vec3 scatteredLight( in vec3 ro, in vec3 rd, in mediaIntersection hit ) {
+vec3 inScatteredLight( in vec3 viewDir ) {
+
+	// get start and end t values for ray through atmosphere
+	mediaIntersection hit = intersectAtmosphere( vec3(0), viewDir );
 	
 	vec3 light = vec3(0);
 
 	//hit.tnear += hash( hit.tnear*100. )*0.1;
-	vec3 pos = ro + hit.tnear * rd;	//hit position
+	vec3 pos = vec3(0);	//hit position
 
 	// step through atmosphere, cast rays to lightsource to determine shadow.
 	float dt = 0.;//(hit.tfar - hit.tnear) / float(uSamplePointsPerFrame);
@@ -205,29 +208,30 @@ vec3 scatteredLight( in vec3 ro, in vec3 rd, in mediaIntersection hit ) {
 	for( int i = 0; i < uSamplePointsPerFrame; ++i ) {
 
 		t = hit.tnear + dt * (float(i) + hash(uFramesStationary) );
-		vec3 apos = ro + rd * t; // position along atmosphere ray
+		vec3 apos = viewDir * t; // position along atmosphere ray
+
+		vec4 atmComp = atmosphereComp( apos );
+		atmComp = clampPositive( atmComp );
 						
-		float stepMieDensity = mieDensity(apos) * dt;
-		mieMass += stepMieDensity; // total mie density along path
-						
-		float stepRayleighDensity = rayleighDensity(apos) * dt;
+		float stepRayleighDensity = atmComp[0] * dt;
 		rayleighMass += stepRayleighDensity; // total rayliegh density from viewer to point
 
-		float cloudDensityAtApos = cloudDensity( apos );
-		cloudDensityAtApos = max( 0., cloudDensityAtApos );
-		float stepCloudDensity = cloudDensityAtApos * dt;
+		float stepMieDensity = atmComp[1] * dt;
+		mieMass += stepMieDensity; // total mie density along path
+						
+		float stepCloudDensity = atmComp[2] * dt;
 		cloudMass += stepCloudDensity; // total cloud density from viewer to point
 		
 		vec3 mieScatterFactors =
-			phase( dot(rd,uSunDir), miePhase ) * mieScatteringConstants
+			phase( dot(viewDir,uSunDir), miePhase ) * mieScatteringConstants
 			* stepMieDensity;
 
 		vec3 rayleighScatterFactors =
-			phase( dot(rd,uSunDir), rayleighPhase ) * rayleighScatteringConstants
+			phase( dot(viewDir,uSunDir), rayleighPhase ) * rayleighScatteringConstants
 			* stepRayleighDensity;
 
 		vec3 cloudScatterFactors =
-			vec3( phase( dot(rd,uSunDir), miePhase ) * cloudMie + cloudScatter )
+			vec3( phase( dot(viewDir,uSunDir), miePhase ) * cloudMie + cloudScatter )
 			* stepCloudDensity;
 
 		vec3 influx = lightCol * attenuationToSun( apos );
@@ -243,20 +247,12 @@ vec3 scatteredLight( in vec3 ro, in vec3 rd, in mediaIntersection hit ) {
 		light += influx * ( rayleighScatterFactors + mieScatterFactors + cloudScatterFactors ) * attenuationToViewer;
 
 		// sun disc
-		float mie_eye = phase( dot(rd,uSunDir), 0.9995 ) * stepMieDensity; // relative amount of Mie scattering.
+		float mie_eye = phase( dot(viewDir,uSunDir), 0.9995 ) * stepMieDensity; // relative amount of Mie scattering.
 		//light += mie_eye * influx * attenuationToViewer;
 	}
 
 	return max( vec3(0), light );
 }
 
-
-vec4 lightAndExtinction( vec3 viewDir, float prevExtinction ) {
-
-	// get start and end t values for ray through atmosphere
-	mediaIntersection atmosphereHit = intersectAtmosphere( vec3(0), viewDir );
-
-	return vec4( scatteredLight( vec3(0), viewDir, atmosphereHit ), 1. );
-}
 
 `
