@@ -13,6 +13,7 @@ uniform sampler2D uAtmosphereLight;
 uniform sampler2D uAtmosphereLightPrev;
 uniform int uSamplePointsPerFrame;
 uniform int uSamplePointsTotal;
+uniform mat4 uScatteringMatrix;
 uniform mat4 uExtinctionMatrix;
 
 varying vec3 vNormal;

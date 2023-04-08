@@ -22,11 +22,6 @@ vec3 lightCol = vec3(1);
 vec4 sph1 = vec4 (0,0,0,1);
 
 
-mat4x3 absorptionTransferMatrix;
-/*
-*/
-
-
 vec4 clampPositive( vec4 x ) {
 	return max( vec4(0), x );
 }
@@ -173,11 +168,6 @@ vec3 attenuationToSun( in vec3 apos ) {
 	//dtl = (hit.tfar - hit.tnear) * clamp( 0.2 - 0.2 * cloudDensityAtSpos*10000., 0.001, 1. );
 	dtl = (hit.tfar - hit.tnear) * 0.2;
 
-	absorptionTransferMatrix[0] = RAYLEIGH_SCATTERING_COEFFS;
-	absorptionTransferMatrix[1] = MIE_SCATTERING_COEFFS + MIE_ABSORPTION_COEFFS;
-	absorptionTransferMatrix[2] = vec3( cloudAbsorb + cloudScatter );
-	//absorptionTransferMatrix[0] = OZONE_SCATTERING_COEFFS + OZONE_ABSORPTION_COEFFS;
-
 	vec3 transmittance = vec3(1);
 
 	for( float tl = hit.tnear; tl < hit.tfar; tl += dtl ) {
@@ -187,7 +177,7 @@ vec3 attenuationToSun( in vec3 apos ) {
 		vec4 atmComp = atmosphereComp( spos );
 		atmComp = clampPositive( atmComp );
 
-		vec3 extinctionThisStep = dtl * absorptionTransferMatrix * atmComp;
+		vec3 extinctionThisStep = (dtl * uExtinctionMatrix * atmComp).xyz;
 
 		transmittance *= exp( - extinctionThisStep );
 	}
