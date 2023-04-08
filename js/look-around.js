@@ -90,11 +90,9 @@ function controlsLoop() {
 
     requestAnimationFrame( controlsLoop );
 
-    if( !Object.keys(activePointers).length ) 
-		return ++uniforms.uFramesStationary.value;
+    if( !Object.keys(activePointers).length ) return;
 
-	else uniforms.uFramesStationary.value = 0;
-
+	uniforms.uFramesStationary.value = 0;
 
 	if( draggingSun )
 		setSunDirection( getMeanPointerPos( activePointers ), canvas, camera, uniforms );
