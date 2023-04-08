@@ -22,7 +22,14 @@ vec3 lightCol = vec3(1);
 vec4 sph1 = vec4 (0,0,0,1);
 
 
+mat4x3 absorptionTransferMatrix;
+/*
+*/
 
+
+vec4 clampPositive( vec4 x ) {
+	return max( vec4(0), x );
+}
 
 float rand(vec2 co) {
 	return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -166,29 +173,23 @@ vec3 attenuationToSun( in vec3 apos ) {
 	//dtl = (hit.tfar - hit.tnear) * clamp( 0.2 - 0.2 * cloudDensityAtSpos*10000., 0.001, 1. );
 	dtl = (hit.tfar - hit.tnear) * 0.2;
 
-	float rayleighToSun = 0.0;
-	float mieToSun      = 0.0;
-	float cloudToSun    = 0.0;
-
+	absorptionTransferMatrix[0] = RAYLEIGH_SCATTERING_COEFFS;
+	absorptionTransferMatrix[1] = MIE_SCATTERING_COEFFS + MIE_ABSORPTION_COEFFS;
+	absorptionTransferMatrix[2] = vec3( cloudAbsorb + cloudScatter );
+	//absorptionTransferMatrix[0] = OZONE_SCATTERING_COEFFS + OZONE_ABSORPTION_COEFFS;
 
 	vec3 transmittance = vec3(1);
-
 
 	for( float tl = hit.tnear; tl < hit.tfar; tl += dtl ) {
 		
 		vec3 spos = apos + uSunDir * tl;
 
 		vec4 atmComp = atmosphereComp( spos );
+		atmComp = clampPositive( atmComp );
 
-		rayleighToSun += atmComp[0] * dtl;
-		mieToSun      += atmComp[1] * dtl;  // acumulate mie density
-		cloudToSun    += max(0., atmComp[2]) * dtl;  // acumulate cloud density
+		vec3 extinctionThisStep = dtl * absorptionTransferMatrix * atmComp;
 
-		transmittance = exp( -(
-			rayleighToSun * rayleighScatteringConstants +
-			mieToSun * ( mieScatteringConstants + mieAbsorptionConstants ) +
-			cloudToSun * vec3(cloudScatter + cloudAbsorb)
-		) );
+		transmittance *= exp( - extinctionThisStep );
 	}
 
 	return transmittance;
