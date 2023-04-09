@@ -6,10 +6,10 @@ const rayleighScatteringCoeffs = new THREE.Vector4(5.80, 13.6, 33.1, 0.00).multi
 const rayleighAbsorptionCoeffs = new THREE.Vector4(0.00, 0.00, 0.00, 0.00).multiplyScalar(1e-6);
 const mieScatteringCoeffs      = new THREE.Vector4(3.99, 3.99, 3.99, 0.00).multiplyScalar(1e-6);
 const mieAbsorptionCoeffs      = new THREE.Vector4(4.40, 4.40, 4.40, 0.00).multiplyScalar(1e-6);
-const ozoneScatteringCoeffs    = new THREE.Vector4(0.00, 0.00, 0.00, 0.00).multiplyScalar(1e-6*0);
-const ozoneAbsorptionCoeffs    = new THREE.Vector4(0.68, 1.88, 0.08, 0.00).multiplyScalar(1e-6*0);
 const cloudScatteringCoeffs    = new THREE.Vector4(12.0, 12.0, 12.0, 0.00);
 const cloudAbsorptionCoeffs    = new THREE.Vector4(1.00, 1.00, 1.00, 0.00);
+const ozoneScatteringCoeffs    = new THREE.Vector4(0.00, 0.00, 0.00, 0.00).multiplyScalar(1e-6*0);
+const ozoneAbsorptionCoeffs    = new THREE.Vector4(0.68, 1.88, 0.08, 0.00).multiplyScalar(1e-6*0);
 
 const uSunDir = (new THREE.Vector3( 0, -0.06, -1 )).normalize();
 const uScatteringMatrix = Array(16).fill(0);

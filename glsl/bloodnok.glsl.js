@@ -12,10 +12,15 @@ vec3 mieAbsorptionConstants = MIE_ABSORPTION_COEFFS;
 float rayleighPhase = -0.01;
 vec3 rayleighScatteringConstants = RAYLEIGH_SCATTERING_COEFFS;
 
+
 // Cloud scattering
 float cloudAbsorb = 1.; // amount of absorption by clouds
 float cloudScatter = 12.0; // amount of omni-directional scatter off clouds
-float cloudMie = 1.; // amount of Mie scattering by clouds
+float cloudMie = 1. / 12.; // amount of Mie scattering by clouds
+float cloudPhase = 0.9;
+vec3 cloudScatteringConstants = vec3(12);
+
+float ozonePhase = 0.;
 
 
 vec3 lightCol = vec3(1);
@@ -152,7 +157,21 @@ vec4 atmosphereComp( in vec3 pos ) {
 	return res;
 }
 
-vec3 attenuationToSun( in vec3 apos ) {
+vec4 phase( in float cosTheta ) {
+
+	// returns a vec4 of the phase function for the 4 different atmopshere components
+	// evaluated at cosTheta
+	vec4 res = vec4(1);
+
+	res[0] = phase( cosTheta, rayleighPhase );
+	res[1] = phase( cosTheta, miePhase );
+	res[2] = phase( cosTheta, cloudPhase ) * cloudMie*1. + 1.;
+	res[3] = phase( cosTheta, ozonePhase );
+
+	return res;
+}
+
+vec3 transmittanceToSun( in vec3 apos ) {
 
 	mediaIntersection hit = intersectAtmosphere( apos, uSunDir ); // cast ray to sun, intersect with inner edge of sphere
 	float dtl = 0.;//( hit.tfar - hit.tnear ) / float(nSamples); // keep it rather chunky, don't want to bog down
@@ -184,9 +203,6 @@ vec3 inScatteredLight( in vec3 viewDir ) {
 	
 	vec3 light = vec3(0);
 
-	//hit.tnear += hash( hit.tnear*100. )*0.1;
-	vec3 pos = vec3(0);	//hit position
-
 	// step through atmosphere, cast rays to lightsource to determine shadow.
 	float dt = 0.;//(hit.tfar - hit.tnear) / float(uSamplePointsPerFrame);
 	dt = (hit.tfar - hit.tnear) * 0.2;
@@ -197,9 +213,7 @@ vec3 inScatteredLight( in vec3 viewDir ) {
 	// - calculate influx at each point
 	// - raymarch towards sun & repeat above process.
 	
-	float mieMass = 0.0;
-	float rayleighMass = 0.0;
-	float cloudMass = 0.0;
+	vec3 transmittanceToViewer = vec3(1);
 
 	float t = hit.tnear;
 	for( int i = 0; i < uSamplePointsPerFrame; ++i ) {
@@ -209,43 +223,18 @@ vec3 inScatteredLight( in vec3 viewDir ) {
 
 		vec4 atmComp = atmosphereComp( apos );
 		atmComp = clampPositive( atmComp );
+
+		float cosTheta = dot(viewDir,uSunDir);
+		vec4 phaseComp = phase( cosTheta );
 						
-		float stepRayleighDensity = atmComp[0] * dt;
-		rayleighMass += stepRayleighDensity; // total rayliegh density from viewer to point
+		vec3 extinctionThisStep = (dt * uExtinctionMatrix * atmComp).xyz;
 
-		float stepMieDensity = atmComp[1] * dt;
-		mieMass += stepMieDensity; // total mie density along path
-						
-		float stepCloudDensity = atmComp[2] * dt;
-		cloudMass += stepCloudDensity; // total cloud density from viewer to point
-		
-		vec3 mieScatterFactors =
-			phase( dot(viewDir,uSunDir), miePhase ) * mieScatteringConstants
-			* stepMieDensity;
+		transmittanceToViewer *= exp( -extinctionThisStep );
 
-		vec3 rayleighScatterFactors =
-			phase( dot(viewDir,uSunDir), rayleighPhase ) * rayleighScatteringConstants
-			* stepRayleighDensity;
+		vec3 scatterThisStep = (uScatteringMatrix * (phaseComp * atmComp) * dt).xyz;
 
-		vec3 cloudScatterFactors =
-			vec3( phase( dot(viewDir,uSunDir), miePhase ) * cloudMie + cloudScatter )
-			* stepCloudDensity;
-
-		vec3 influx = lightCol * attenuationToSun( apos );
-
-		vec3 attenuationToViewer = exp( -(
-			rayleighMass * rayleighScatteringConstants +
-			mieMass * mieScatteringConstants +
-			cloudMass * vec3(cloudScatter) +
-			mieMass * mieAbsorptionConstants +
-			cloudMass * vec3(cloudAbsorb)
-		) );
-
-		light += influx * ( rayleighScatterFactors + mieScatterFactors + cloudScatterFactors ) * attenuationToViewer;
-
-		// sun disc
-		float mie_eye = phase( dot(viewDir,uSunDir), 0.9995 ) * stepMieDensity; // relative amount of Mie scattering.
-		//light += mie_eye * influx * attenuationToViewer;
+		vec3 influx = lightCol * transmittanceToSun( apos );
+		light += influx * scatterThisStep * transmittanceToViewer;
 	}
 
 	return max( vec3(0), light );
