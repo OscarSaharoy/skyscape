@@ -40,6 +40,11 @@ vec4 atmosphereComp( in vec3 pos ) {
 	return res;
 }
 
+float stepSize( in vec4 atmComp, in float rayLength ) {
+	
+	return rayLength * clamp( 0.1 * - (atmComp[2] - 0.8), 0.01, 0.2 );
+}
+
 vec4 phase( in float cosTheta ) {
 
 	// returns a vec4 of the phase function for the 4 different atmopshere components
@@ -62,9 +67,8 @@ vec4 phase( in float cosTheta ) {
 vec3 transmittanceToSun( in vec3 apos ) {
 
 	mediaIntersection hit = intersectAtmosphere( apos, uSunDir ); // cast ray to sun, intersect with inner edge of sphere
-	float dtl = 0.;//( hit.tfar - hit.tnear ) / float(nSamples); // keep it rather chunky, don't want to bog down
-	//dtl = (hit.tfar - hit.tnear) * clamp( 0.2 - 0.2 * cloudDensityAtSpos*10000., 0.001, 1. );
-	dtl = (hit.tfar - hit.tnear) * 0.2;
+	float rayLength = hit.tfar - hit.tnear;
+	float dtl = rayLength * 0.1;
 
 	vec3 transmittance = vec3(1);
 
@@ -73,11 +77,15 @@ vec3 transmittanceToSun( in vec3 apos ) {
 		vec3 spos = apos + uSunDir * tl;
 
 		vec4 atmComp = atmosphereComp( spos );
+		dtl = stepSize( atmComp, rayLength );
 		atmComp = clampPositive( atmComp );
 
 		vec3 extinctionThisStep = (dtl * uExtinctionMatrix * atmComp).xyz;
 
 		transmittance *= exp( - extinctionThisStep );
+		
+		if( length(transmittance) < 0.01 )
+			return transmittance;
 	}
 
 	return transmittance;
@@ -92,21 +100,18 @@ vec3 inScatteredLight( in vec3 viewDir ) {
 	vec3 light = vec3(0);
 
 	// step through atmosphere, cast rays to lightsource to determine shadow.
-	float dt = 0.;//(hit.tfar - hit.tnear) / float(uSamplePointsPerFrame);
 	float rayLength = hit.tfar - hit.tnear;
-	dt = rayLength * 0.1;
-	//dt = (hit.tfar - hit.tnear) * clamp( 0.2 - 0.2 * cloudDensityAtApos*1000., 0.001, 1. );
+	float dt = rayLength * 0.1;
 	
 	vec3 transmittanceToViewer = vec3(1);
+	vec3 lightLastStep = vec3(0);
 
-	float t = hit.tnear;
-	for( int i = 0; i < uSamplePointsPerFrame; ++i ) {
+	for( float t = hit.tnear; t < hit.tfar; t += dt ) {
 
-		t = hit.tnear + dt * (float(i) + hash(uFramesStationary) );
 		vec3 apos = viewDir * t; // position along atmosphere ray
 
 		vec4 atmComp = atmosphereComp( apos );
-		dt = rayLength * 0.2;
+		dt = stepSize( atmComp, rayLength );
 		atmComp = clampPositive( atmComp );
 
 		float cosTheta = dot(viewDir,uSunDir);
@@ -115,11 +120,15 @@ vec3 inScatteredLight( in vec3 viewDir ) {
 		vec3 extinctionThisStep = (uExtinctionMatrix * atmComp).xyz * dt;
 
 		transmittanceToViewer *= exp( -extinctionThisStep );
-
+		
 		vec3 scatterThisStep = (uScatteringMatrix * (phaseComp * atmComp)).xyz * dt;
 
 		vec3 influx = lightCol * transmittanceToSun( apos );
-		light += influx * scatterThisStep * transmittanceToViewer;
+		light += ( lightLastStep + influx * scatterThisStep * transmittanceToViewer ) / 2.;
+		vec3 lightLastStep = influx * scatterThisStep * transmittanceToViewer;
+
+		if( length(transmittanceToViewer) < 0.01 )
+			return max( vec3(0), light );
 	}
 
 	return max( vec3(0), light );
