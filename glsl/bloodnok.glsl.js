@@ -3,18 +3,6 @@ export default `
 
 // atmospheric scattering specifics
 
-// Mie scattering
-float miePhase = 0.9;
-
-// Rayleigh scattering
-float rayleighPhase = -0.01;
-
-// Cloud scattering
-float cloudPhase = 0.9;
-
-// Ozone Scattering
-float ozonePhase = 0.;
-
 
 vec3 lightCol = vec3(1);
 
@@ -57,6 +45,11 @@ vec4 phase( in float cosTheta ) {
 	// returns a vec4 of the phase function for the 4 different atmopshere components
 	// evaluated at cosTheta
 	vec4 res = vec4(1);
+
+	float miePhase = 0.9;
+	float rayleighPhase = -0.01;
+	float cloudPhase = 0.9;
+	float ozonePhase = 0.;
 
 	res[0] = phase( cosTheta, rayleighPhase );
 	res[1] = phase( cosTheta, miePhase );
