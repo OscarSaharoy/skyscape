@@ -10,7 +10,6 @@ float miePhase = 0.9;
 float rayleighPhase = -0.01;
 
 // Cloud scattering
-float cloudMie = 1. / 12.; // amount of Mie scattering by clouds
 float cloudPhase = 0.9;
 
 // Ozone Scattering
@@ -37,31 +36,6 @@ float phase(float alpha, float g) {
 }
 
 
-float mieDensity( in vec3 pos ) {
-
-    float heightAboveSurface = 
-        length(pos - EARTH_CENTRE) - EARTH_RADIUS;
-    return exp( -heightAboveSurface / 1200. );
-}
-
-float rayleighDensity( in vec3 pos ) {
-
-    float heightAboveSurface = 
-        length(pos - EARTH_CENTRE) - EARTH_RADIUS;
-    return exp( - heightAboveSurface / 8000. );
-}
-
-float cloudDensity( in vec3 pos ) {
-
-    float heightAboveSurface = 
-        length(pos - EARTH_CENTRE) - EARTH_RADIUS;
-	
-	float lowGap = smoothstep( 0., 1., heightAboveSurface / 1000. );
-	float highClip = smoothstep( 0., 1., (15000. - heightAboveSurface) / 1000. );
-
-	return 1e-5*( fbm(pos*5e-5) - 1.2 );// * lowGap * highClip;
-}
-
 vec4 atmosphereComp( in vec3 pos ) {
 
 	// returns a vec4 of the rayleigh, mie, cloud and ozone densities at a given point
@@ -86,7 +60,7 @@ vec4 phase( in float cosTheta ) {
 
 	res[0] = phase( cosTheta, rayleighPhase );
 	res[1] = phase( cosTheta, miePhase );
-	res[2] = phase( cosTheta, cloudPhase ) * cloudMie*1. + 1.;
+	res[2] = phase( cosTheta, cloudPhase ) * 1. / 12. + 1.;
 	res[3] = phase( cosTheta, ozonePhase );
 
 	return res;
