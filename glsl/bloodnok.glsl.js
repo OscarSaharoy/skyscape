@@ -69,12 +69,10 @@ vec4 atmosphereComp( in vec3 pos ) {
 
     float heightAboveSurface = 
         length(pos - EARTH_CENTRE) - EARTH_RADIUS;
-	float lowGap = smoothstep( 0., 1., heightAboveSurface / 1000. );
-	float highClip = smoothstep( 0., 1., (15000. - heightAboveSurface) / 1000. );
 
     res[0] = exp( - heightAboveSurface / 8000. ); // rayleigh
     res[1] = exp( - heightAboveSurface / 1200. ); // mie
-	res[2] = ( fbm(pos*5e-5) - 1.2 );// * lowGap * highClip; // cloud
+	res[2] = fbm(pos*5e-5) - 1.2; // cloud
 	res[3] = max(0., 1. - abs(heightAboveSurface - 25e+3) / 15e+3 ); // ozone
 
 	return res;
