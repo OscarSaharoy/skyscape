@@ -20,6 +20,7 @@ int main() {
 		printf( "float: %1.30f\n", (R+h)/R );
 		printf( "double: %1.30f\n", (dR+dh)/dR );
 		printf( "float2: %1.30f\n", 1. + h/R );
+		printf( "double2: %1.30f\n", 1. + dh/dR );
 
 		double dd = 10;
 		h += (float)dd;
