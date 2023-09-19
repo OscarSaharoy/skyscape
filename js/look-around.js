@@ -83,6 +83,7 @@ function onWheel( event ) {
 	event.preventDefault();
 	uniforms.uFramesStationary.value = 0;
     zoomCamera( -event.deltaY / 200 ); 
+	uniforms.uZoom.value = camera.zoom;
 }
 
 
