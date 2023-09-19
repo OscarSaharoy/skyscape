@@ -2,6 +2,8 @@
 
 export default `
 
+#define POLE_SENTINEL vec3(-1)
+
 vec3 dirToCellUV( vec3 dir,
 		float bandOffset, float cellOffset ) {
 
@@ -24,6 +26,9 @@ vec3 dirToCellUV( vec3 dir,
 
 	vec3 cellCoords = vec3(band, cell, 0.); 
 
+	if( band < 1.5 * bandHeight || band > PI - 2.5 * bandHeight  )
+		return POLE_SENTINEL;
+
 	float phic = (phi - band) / bandHeight;
 	float thetac = (theta - cell) / cellLength;
 
@@ -43,17 +48,16 @@ vec3 dirToCellUV( vec3 dir,
 
 vec3 starFunction( vec3 celluv ) {
 
-    float size = pow(celluv.z, 15.);
-	float twinkle = 
-		1. - hash11(uTime + celluv.z) * 0.2;
-	vec2 jitter = hash12(celluv.z) * 2. - 1.;
+	vec2 jitter = hash12(celluv.z) * 3. - 1.5;
+	float scale = 0.00003 * ( 1. - pow( length(jitter) / 2.12, 0.06 ) );
+	float r = length(celluv.xy + jitter);
 
-	return saturate(vec3(
-		1. / length(celluv.xy + jitter)
-           * size * 0.002 * twinkle
-	       - .001
-	)
-	/ pow(uZoom, 0.75));
+	if( scale < 0.000001 ) return vec3(0);
+
+	return saturate(
+		vec3( scale / pow(r, 1.8) - 0.001 )
+		/ pow(uZoom, 0.75)
+	);
 }
 
 vec3 starLight( vec3 viewDir ) {
@@ -68,7 +72,11 @@ vec3 starLight( vec3 viewDir ) {
 
 		vec3 celluv = dirToCellUV( 
 			rotatedView, bo, co );
-		celluv.xy += hash12(celluv.z * 100.) - .5;
+
+		if( celluv == POLE_SENTINEL )
+			continue;
+
+		//if( celluv.z > 0.05 ) continue;
 
 		light += starFunction( celluv );
 	}
