@@ -62,6 +62,9 @@ vec3 starFunction( vec3 celluv ) {
 
 vec3 starLight( vec3 viewDir ) {
 
+	if( dot( viewDir, UP ) < 0. )
+		return vec3(0);
+
 	vec3 rotatedView = 
 		(vec4(viewDir, 1.) * uStarsRotation).xyz;
 

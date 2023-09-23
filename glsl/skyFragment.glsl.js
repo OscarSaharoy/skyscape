@@ -25,13 +25,17 @@ void main() {
 
 	//light = vec3(0.05);
     //light += starLight( viewDir );
-	//light += sunLight( viewDir );
 	//light += moonLight( viewDir );
 	//light += atmosphereNoise( viewDir );
     //light += oceanLight( viewDir, light );
 	light += sunLight( viewDir );
 
     light += texture2D(uAtmosphereLight, gl_FragCoord.xy/uResolution).xyz / (uFramesStationary + 1.);
+
+	if( oceanReflectionDir( viewDir ) != NO_OCEAN_LIGHT ) {
+		vec2 newuv = vec2( gl_FragCoord.x, uResolution.y-gl_FragCoord.y );
+		light += texture2D(uAtmosphereLight, newuv/uResolution).xyz / (uFramesStationary + 1.);
+	}
 	
 	// reinhardt HDR tonemapping
     float whitelevel = 5.;
