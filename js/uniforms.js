@@ -43,5 +43,7 @@ export const uniforms = {
 	uSamplePointsTotal: { value: 200 },
 	uExtinctionMatrix: { value: uExtinctionMatrix },
 	uScatteringMatrix: { value: uScatteringMatrix },
+	uProjectionMatrix: { value: new THREE.Matrix4() },
+	uUnProjectionMatrix: { value: new THREE.Matrix4() },
 };
 

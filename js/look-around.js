@@ -84,6 +84,8 @@ function onWheel( event ) {
 	uniforms.uFramesStationary.value = 0;
     zoomCamera( -event.deltaY / 200 ); 
 	uniforms.uZoom.value = camera.zoom;
+	uniforms.uProjectionMatrix.value.multiplyMatrices( camera.projectionMatrix, camera.matrixWorld );
+	uniforms.uUnProjectionMatrix.value.multiplyMatrices( camera.matrixWorldInverse, camera.projectionMatrixInverse );
 }
 
 
@@ -107,6 +109,8 @@ function controlsLoop() {
 		prevPointerSpread = getPointerSpread( activePointers );
 		zoomCamera( spreadDelta * 40 );
 		uniforms.uZoom.value = camera.zoom;
+		uniforms.uProjectionMatrix.value.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
+		uniforms.uUnProjectionMatrix.value.multiplyMatrices( camera.matrixWorld, camera.projectionMatrixInverse );
 	}
 }
 controlsLoop();

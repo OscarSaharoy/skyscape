@@ -15,6 +15,8 @@ uniform int uSamplePointsPerFrame;
 uniform int uSamplePointsTotal;
 uniform mat4 uScatteringMatrix;
 uniform mat4 uExtinctionMatrix;
+uniform mat4 uProjectionMatrix;
+uniform mat4 uUnProjectionMatrix;
 
 varying vec3 vNormal;
 

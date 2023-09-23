@@ -28,13 +28,24 @@ void main() {
 	//light += moonLight( viewDir );
 	//light += atmosphereNoise( viewDir );
     //light += oceanLight( viewDir, light );
-	light += sunLight( viewDir );
+	//light += sunLight( viewDir );
 
-    light += texture2D(uAtmosphereLight, gl_FragCoord.xy/uResolution).xyz / (uFramesStationary + 1.);
+    //light += texture2D(uAtmosphereLight, gl_FragCoord.xy/uResolution).xyz / (uFramesStationary + 1.);
 
-	if( oceanReflectionDir( viewDir ) != NO_OCEAN_LIGHT ) {
-		vec2 newuv = vec2( gl_FragCoord.x, uResolution.y-gl_FragCoord.y );
-		light += texture2D(uAtmosphereLight, newuv/uResolution).xyz / (uFramesStationary + 1.);
+	vec4 unProjected = uUnProjectionMatrix * vec4( gl_FragCoord.xyz / uResolution.xyy * 2. - 1., 1. );
+	light += normalize( unProjected.xyz / unProjected.w );
+
+	//light += gl_FragCoord.xyy / uResolution.xyy;
+	//light += unProjected.xyz / unProjected.w;
+	//light += viewDir;
+	//light += uUnProjectionMatrix[3].xyw;
+
+/*
+	vec3 reflectedViewDir = oceanReflectionDir( viewDir );
+	if( reflectedViewDir != NO_OCEAN_LIGHT ) {
+		vec3 uvw = ( uProjectionMatrix * vec4( reflectedViewDir, 1. ) ).xyz;
+		vec2 newuv = uvw.xy / uvw.z;
+		//light += texture2D(uAtmosphereLight, newuv/uResolution).xyz / (uFramesStationary + 1.);
 	}
 	
 	// reinhardt HDR tonemapping
@@ -43,6 +54,7 @@ void main() {
 
 	// gamma correction
     light = pow(light , vec3(1. / 2.2));
+*/
 
 	gl_FragColor = vec4( light, 1. );
 }
