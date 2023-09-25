@@ -39,9 +39,10 @@ void main() {
 
 	vec3 reflectedViewDir = oceanReflectionDir( viewDir );
 	if( reflectedViewDir != NO_OCEAN_LIGHT ) {
-		vec4 projected = uProjectionMatrix * vec4( reflectedViewDir, 1. );
-		vec2 fragCoord = ( ( projected.xy / projected.w ) + 1. ) * uResolution.xy / 2.;
-		light += texture2D(uAtmosphereLight, fragCoord/uResolution.xy).xyz / (uFramesStationary + 1.);
+		vec4 ndc = uProjectionMatrix * vec4( reflectedViewDir, 1. );
+		vec2 fragCoord = ( ( ndc.xy / ndc.w ) + 1. ) / 2.;
+		if( fragCoord.y < 1. )
+			light += texture2D(uAtmosphereLight, fragCoord).xyz / (uFramesStationary + 1.);
 	}
 	
 	// reinhardt HDR tonemapping
