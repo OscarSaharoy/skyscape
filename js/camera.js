@@ -44,6 +44,10 @@ export function panCamera( delta ) {
     camera.lookAt( 
 		cameraForward.add( adjust ).normalize()
 	);
+
+	camera.updateMatrix();
+	camera.updateMatrixWorld();
+    camera.updateProjectionMatrix();
 }
 
 
