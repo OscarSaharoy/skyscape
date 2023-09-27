@@ -38,7 +38,7 @@ void main() {
 	//light += uUnProjectionMatrix[3].xyw;
 
 	vec3 reflectedViewDir = oceanReflectionDir( viewDir );
-	if( reflectedViewDir != NO_OCEAN_LIGHT ) {
+	if( reflectedViewDir != NO_OCEAN_INTERSECT ) {
 		vec4 ndc = uProjectionMatrix * vec4( reflectedViewDir, 1. );
 		vec2 fragCoord = ( ( ndc.xy / ndc.w ) + 1. ) / 2.;
 		if( fragCoord.y < 1. )
