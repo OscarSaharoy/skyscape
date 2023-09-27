@@ -11,7 +11,7 @@ const cloudAbsorptionCoeffs    = new THREE.Vector4(10.0, 10.0, 10.0, 0.00).multi
 const ozoneScatteringCoeffs    = new THREE.Vector4(0.00, 0.00, 0.00, 0.00).multiplyScalar(1e-6*0);
 const ozoneAbsorptionCoeffs    = new THREE.Vector4(0.68, 1.88, 0.08, 0.00).multiplyScalar(1e-6*0);
 
-const uSunDir = (new THREE.Vector3( 0, -0.06, -1 )).normalize();
+const uSunDir = (new THREE.Vector3( 0, 0.3, -1 )).normalize();
 const uScatteringMatrix = Array(16).fill(0);
 const uExtinctionMatrix = Array(16).fill(0);
 
