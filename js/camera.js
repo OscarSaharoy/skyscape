@@ -1,6 +1,7 @@
 // Oscar Saharoy 2023
 
 import { canvas } from "./canvas.js";
+import { uniforms } from "./uniforms.js";
 import * as THREE from './three.module.js'; 
 
 
@@ -45,9 +46,7 @@ export function panCamera( delta ) {
 		cameraForward.add( adjust ).normalize()
 	);
 
-	camera.updateMatrix();
-	camera.updateMatrixWorld();
-    camera.updateProjectionMatrix();
+	updateCameraUniforms();
 }
 
 
@@ -58,6 +57,17 @@ export function zoomCamera( delta ) {
 
 	// update the camera zoom
     camera.zoom = Math.max( 0.5, camera.zoom * adjust );
+
+	updateCameraUniforms();
+}
+
+export function updateCameraUniforms() {
+	camera.updateMatrix();
+	camera.updateMatrixWorld();
     camera.updateProjectionMatrix();
+
+	uniforms.uZoom.value = camera.zoom;
+	uniforms.uProjectionMatrix.value.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
+	uniforms.uUnProjectionMatrix.value.multiplyMatrices( camera.matrixWorld, camera.projectionMatrixInverse );
 }
 
