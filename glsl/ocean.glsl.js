@@ -3,6 +3,7 @@
 export default `
 
 #define NO_OCEAN_LIGHT vec3(-1)
+#define NO_OCEAN_INTERSECT vec3(-1)
 
 vec3 intersectOcean( vec3 viewDir ) {
 
