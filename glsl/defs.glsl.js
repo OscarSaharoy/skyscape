@@ -3,6 +3,7 @@
 export default `
 
 uniform float uTime;
+uniform int uFrame;
 uniform float uZoom;
 uniform float uFramesStationary;
 uniform vec2 uResolution;

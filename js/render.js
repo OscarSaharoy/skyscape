@@ -4,7 +4,7 @@ import "./resize.js";
 import "./look-around.js";
 import { camera } from "./camera.js";
 import { renderer } from "./renderer.js";
-import { uniforms } from "./uniforms.js";
+import { uniforms, updateTimingUniforms } from "./uniforms.js";
 import { renderScreen } from "./screen.js";
 import { renderAtmosphereLight } from "./atmosphere-light.js";
 
@@ -15,9 +15,10 @@ import { renderAtmosphereLight } from "./atmosphere-light.js";
 
 
 // render loop
-( function renderLoop() {
+( function renderLoop( timestampMillis ) {
 	requestAnimationFrame( renderLoop );
-
+	
+	updateTimingUniforms( timestampMillis );
 	if( uniforms.uFramesStationary.value++ >= 1 ) return;
 
 	renderAtmosphereLight( renderer, camera );

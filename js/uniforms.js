@@ -31,7 +31,8 @@ cloudExtinction.toArray( uExtinctionMatrix, 8 );
 ozoneExtinction.toArray( uExtinctionMatrix, 12 );
 
 export const uniforms = {
-    uTime: { value: 0. },
+    uTime: { value: 0 },
+	uFrame: { value: 0 },
 	uZoom: { value: 1. },
 	uFramesStationary: { value: 0 },
     uResolution: { value: new THREE.Vector2() },
@@ -46,4 +47,9 @@ export const uniforms = {
 	uProjectionMatrix: { value: new THREE.Matrix4() },
 	uUnProjectionMatrix: { value: new THREE.Matrix4() },
 };
+
+export function updateTimingUniforms( timestampMillis ) {
+	++uniforms.uFrame.value;
+	uniforms.uTime.value = timestampMillis / 1000;
+}
 
