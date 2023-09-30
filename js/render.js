@@ -18,6 +18,8 @@ import { renderAtmosphereLight } from "./atmosphere-light.js";
 ( function renderLoop() {
 	requestAnimationFrame( renderLoop );
 
+	if( uniforms.uFramesStationary.value++ >= 1 ) return;
+
 	renderAtmosphereLight( renderer, camera );
 	renderScreen( renderer, camera );
 } )();
