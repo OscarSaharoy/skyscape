@@ -20,6 +20,7 @@ ocean +
 
 void main() {
 
+	vec2 res = vec2(uResolution);
     vec3 viewDir = normalize(vNormal);
     vec3 light = vec3(0);
 
@@ -30,7 +31,7 @@ void main() {
     //light += oceanLight( viewDir, light );
 	//light += sunLight( viewDir );
 
-    light += texture2D(uAtmosphereLight, gl_FragCoord.xy/uResolution).xyz / (uFramesStationary + 1.);
+    light += texture2D(uAtmosphereLight, gl_FragCoord.xy/res).xyz / (uFramesStationary + 1.);
 
 	//light += gl_FragCoord.xyy / uResolution.xyy;
 	//light += unProjected.xyz / unProjected.w;

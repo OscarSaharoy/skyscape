@@ -16,7 +16,8 @@ void main() {
 
     vec3 viewDir = normalize(vNormal);
 
-	vec4 prevLight = texture2D( uAtmosphereLight, gl_FragCoord.xy/uResolution );
+	vec2 res = vec2(uResolution);
+	vec4 prevLight = texture2D( uAtmosphereLight, gl_FragCoord.xy/res );
 
 	float addToPrev = step( 0.5, uFramesStationary );
 

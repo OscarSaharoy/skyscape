@@ -5,7 +5,7 @@ export default `
 uniform float uTime;
 uniform float uZoom;
 uniform float uFramesStationary;
-uniform vec2 uResolution;
+uniform ivec2 uResolution;
 uniform vec3 uSunDir;
 uniform vec3 uMoonDir;
 uniform mat4 uStarsRotation;
