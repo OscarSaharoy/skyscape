@@ -7,7 +7,7 @@ import { renderer } from "./renderer.js";
 import { atmosphereLightBuffers } from "./atmosphere-light.js";
 
 
-const dpr = 0.125;//window.devicePixelRatio;
+const dpr = 0.25;//window.devicePixelRatio;
 
 function resize() {
 
