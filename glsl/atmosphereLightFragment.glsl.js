@@ -15,15 +15,11 @@ bloodnok +
 void main() {
 
     vec3 viewDir = normalize(vNormal);
+    vec3 light = vec3(0);
 
-	vec2 res = vec2(uResolution);
-	vec4 prevLight = texture2D( uAtmosphereLight, gl_FragCoord.xy/res );
+	light += inScatteredLight( viewDir );
 
-	float addToPrev = step( 0.5, uFramesStationary );
-
-	gl_FragColor = 
-		vec4( inScatteredLight( viewDir ), 1. )
-		+ prevLight * addToPrev;
+	gl_FragColor = vec4( light, 1. );
 }
 
 `;
