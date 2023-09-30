@@ -1,4 +1,4 @@
-export default '
+export default `
 
 
 /*
@@ -11,7 +11,7 @@ export default '
 #define TWO_PI (2.0 * PI)
 
 // Variable iterator initializer to stop loop unrolling
-#define ZERO (min(iFrame,0))
+#define ZERO (min(uFrame,0))
 
 // Different step counts for full and interactive states
 #define STEPS_PRIMARY 75
@@ -21,7 +21,7 @@ export default '
 #define STEPS_LIGHT_LOW 7
 
 // Offset the sample point by blue noise to get rid of banding
-#define DITHERING
+//#define DITHERING
 const float goldenRatio = 1.61803398875;
 
 // Scattering coefficient based on Earth's atmosphere but tweaked for this look
@@ -47,15 +47,11 @@ const vec3 minCorner = vec3(-CLOUD_EXTENT, -CLOUD_EXTENT, -CLOUD_EXTENT);
 const vec3 maxCorner = vec3(CLOUD_EXTENT, CLOUD_EXTENT, CLOUD_EXTENT);
 
 
-float saturate(float x){
-	return clamp(x, 0.0, 1.0);
-}
-
 //-------------------------------- Camera --------------------------------
 
 vec3 rayDirection(float fieldOfView, vec2 fragCoord) {
-    vec2 xy = fragCoord - iResolution.xy / 2.0;
-    float z = (0.5 * iResolution.y) / tan(radians(fieldOfView) / 2.0);
+    vec2 xy = fragCoord - uResolution.xy / 2.0;
+    float z = (0.5 * uResolution.y) / tan(radians(fieldOfView) / 2.0);
     return normalize(vec3(xy, -z));
 }
 
@@ -124,7 +120,7 @@ float gyroid(vec3 p, float thickness, float bias, float frequency){
 }
 
 // Gyroid noise based on https://www.shadertoy.com/view/3l23Rh
-float fbm(vec3 p){
+float gfbm(vec3 p){
 
     const int octaves = 12;
     const float fbmScale = 1.95;
@@ -140,7 +136,7 @@ float fbm(vec3 p){
     float res = 0.0;
     
     
-    for(int i = min(0, iFrame); i < octaves; i++){
+    for(int i = min(0, uFrame); i < octaves; i++){
         res += amplitude * gyroid(p, 0.1, 0.0, frequency);
         p *= m3;
         weight += amplitude;
@@ -155,7 +151,7 @@ float clouds(vec3 p){
     if(!insideAABB(p)){
         return 0.0;
     }
-    float noise = fbm(0.25*p);
+    float noise = gfbm(0.25*p);
     float structure = smoothstep(3.0, 5.0, length(p)) * smoothstep(0.05, 0.1, noise);
     float haze = smoothstep(2.0, 10.0, length(p)) * smoothstep(0.02, 0.5, noise);
     return 3e-4+(0.5*haze + 0.75 * structure);
@@ -371,14 +367,11 @@ vec3 ACESFilm(vec3 x){
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord ){
     
-    float tileSize = iResolution.x < 2000.0 ? 256.0 : 128.0;
-    float framesToDraw = ceil(iResolution.x / tileSize);
+    float tileSize = uResolution.x < 2000.0 ? 256.0 : 128.0;
+    float framesToDraw = ceil(uResolution.x / tileSize);
     
-    float framesDrawn = texelFetch(iChannel1, ivec2(0.5, 0.5), 0).x;
-    bool blueNoiseNotLoaded = iChannelResolution[2].xy != vec2(1024);
-    bool resolutionChanged = texelFetch(iChannel0, ivec2(0.5, 2.5), 0).x > 0.0;
-    
-    bool renderPreview = resolutionChanged || blueNoiseNotLoaded || iFrame == 0 || iMouse.z > 0.0;
+    float framesDrawn = uFramesStationary;
+    bool renderPreview = framesDrawn == 0.;
     bool renderFull = framesDrawn < framesToDraw && !renderPreview;
     
     float tileStart = framesDrawn * tileSize;
@@ -391,7 +384,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
         // Get the default direction of the ray (along the negative Z direction)
         vec3 rayDir = rayDirection(55.0, fragCoord);
         
-        vec3 cameraPos = texelFetch(iChannel0, ivec2(0.5, 1.5), 0).xyz;
+        vec3 cameraPos = vec3(0);
 
         vec3 targetDir = -cameraPos;
 
@@ -422,7 +415,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
         if(iChannelResolution[2].xy == vec2(1024)){
             // From https://blog.demofox.org/2020/05/10/ray-marching-fog-with-blue-noise/
             float blueNoise = texture(iChannel2, fragCoord / 1024.0).r;
-            offset = fract(blueNoise + float(iFrame%32) * goldenRatio);
+            offset = fract(blueNoise + float(uFrame%32) * goldenRatio);
         }
         #endif
 
@@ -437,11 +430,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
 
         fragColor = vec4(col, 1.0);
         
-    }else{
-        vec4 oldData = texelFetch(iChannel1, ivec2(fragCoord), 0);
-        fragColor = oldData;
-    }
-    
+    }    
     // Store the number of full resolution frames which have been drawn for the current view
     if(fragCoord == vec2(0.5, 0.5)){
         if(renderPreview){
@@ -452,5 +441,5 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
     }
 }
 
-';
+`;
 
