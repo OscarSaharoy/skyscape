@@ -11,8 +11,12 @@ typedef struct {
 	float z;
 } vec3;
 
+float dot( vec3 v_a, vec3 v_b ) {
+	return v_a.x * v_b.x + v_a.y * v_b.y + v_a.z * v_b.z;
+}
+
 float length( vec3 v ) {
-	return sqrtf( v.x*v.x + v.y*v.y + v.z*v.z );
+	return sqrtf(dot( v, v ));
 }
 
 vec3 scale( vec3 v, float f ) {
@@ -56,13 +60,10 @@ float height( vec3 p ) {
 	return length( sub( p, earthCentre ) ) - EARTH_RADIUS;
 }
 
-float integrateAlongRay() {
+float integrateAlongRay(vec3 ro, vec3 rd) {
 
-	vec3 ro = { 0., 0., 0. };
-	vec3 rd = { .1, 0., 1. };
-	rd = normalize( rd );
-	float rayLength = 100000.f;
-	float nSteps = 100.f;
+	float rayLength = 1000000.f;
+	float nSteps = 100000.f;
 	float step = rayLength / nSteps;
 
 	float result = 0.f;
@@ -92,16 +93,49 @@ float integrate() {
 	return result;
 }
 
-float estimate() {
+float integrateColumn( float h ) {
+
+	return 12.5e+3 * (
+		expf( -h / 12.5e+3  )
+	);
+}
+
+float estimate(vec3 ro, vec3 rd) {
 	
-	vec3 rd = { .1, 0., 1. };
-	return 1.f;
+	vec3 up = { 0.f, 0.f, 1.f };
+	float cosTheta = dot( rd, up );
+	return integrateColumn(height(ro)) / cosTheta;
+}
+
+float estimate1(vec3 ro, vec3 rd) {
+	
+	vec3 down = { 0.f, 0.f, -1.f };
+
+	float cosGamma = dot( rd, down );
+	float R = EARTH_RADIUS;
+	float h = 100e+3;
+
+	float h2 = R * cosGamma + sqrtf(
+		R*R*cosGamma*cosGamma + 2.*R*h + h*h
+	);
+
+	return integrateColumn(height(ro)) * h2/h;
+}
+
+float estimate2(vec3 ro, vec3 rd) {
+	
+	return sqrtf( estimate1(ro, rd) * estimate(ro, rd) );
 }
 
 
 int main() {
 
-	printf( "integrateAlongRay: %f\n", integrateAlongRay() );
-	printf( "integrate: %f\n", integrate() );
-	printf( "estimate: %f\n", estimate() );
+	vec3 ro = { 0.f, 0.f, 3331.f };
+	vec3 rd = { 14.f, 0.f, 1.f };
+	rd = normalize( rd );
+
+	printf( "integrateAlongRay: %f\n", integrateAlongRay(ro, rd) );
+	printf( "estimate: %f\n",  estimate( ro, rd) );
+	printf( "estimate1: %f\n", estimate1(ro, rd) );
+	printf( "estimate2: %f\n", estimate2(ro, rd) );
 }

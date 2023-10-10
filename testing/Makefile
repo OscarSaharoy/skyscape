@@ -1,5 +1,5 @@
 integration: integration.c
-	@cc integration.c -o integration
+	@cc integration.c -o integration -lm
 
 integrate: integration
 	@./integration
