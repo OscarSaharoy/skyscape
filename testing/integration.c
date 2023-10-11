@@ -3,6 +3,8 @@
 #include <time.h>
 #include <math.h>
 
+#define vec3(x, y, z) {x, y, z}
+
 #define EARTH_RADIUS 6360e+3
 
 typedef struct {
@@ -102,14 +104,14 @@ float integrateColumn( float h ) {
 
 float estimate(vec3 ro, vec3 rd) {
 	
-	vec3 up = { 0.f, 0.f, 1.f };
+	vec3 up = vec3( 0.f, 0.f, 1.f );
 	float cosTheta = dot( rd, up );
 	return integrateColumn(height(ro)) / cosTheta;
 }
 
 float estimate1(vec3 ro, vec3 rd) {
 	
-	vec3 down = { 0.f, 0.f, -1.f };
+	vec3 down = vec3( 0.f, 0.f, -1.f );
 
 	float cosGamma = dot( rd, down );
 	float R = EARTH_RADIUS;
@@ -130,8 +132,8 @@ float estimate2(vec3 ro, vec3 rd) {
 
 int main() {
 
-	vec3 ro = { 0.f, 0.f, 3331.f };
-	vec3 rd = { 14.f, 0.f, 1.f };
+	vec3 ro = vec3( 0.f, 0.f, 3331.f );
+	vec3 rd = vec3( 100.f, 0.f, 1.f );
 	rd = normalize( rd );
 
 	printf( "integrateAlongRay: %f\n", integrateAlongRay(ro, rd) );
