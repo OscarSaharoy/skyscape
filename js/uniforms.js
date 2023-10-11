@@ -17,8 +17,8 @@ const uExtinctionMatrix = Array(16).fill(0);
 
 rayleighScatteringCoeffs.toArray( uScatteringMatrix, 0 );
 mieScatteringCoeffs.toArray( uScatteringMatrix, 4 );
-cloudScatteringCoeffs.toArray( uScatteringMatrix, 8 );
-ozoneScatteringCoeffs.toArray( uScatteringMatrix, 12 );
+ozoneScatteringCoeffs.toArray( uScatteringMatrix, 8 );
+cloudScatteringCoeffs.toArray( uScatteringMatrix, 12 );
 
 const rayleighExtinction = (new THREE.Vector4()).addVectors( rayleighScatteringCoeffs, rayleighAbsorptionCoeffs );
 const mieExtinction      = (new THREE.Vector4()).addVectors( mieScatteringCoeffs, mieAbsorptionCoeffs );
@@ -27,8 +27,8 @@ const ozoneExtinction    = (new THREE.Vector4()).addVectors( ozoneScatteringCoef
 
 rayleighExtinction.toArray( uExtinctionMatrix, 0 );
 mieExtinction.toArray( uExtinctionMatrix, 4 );
-cloudExtinction.toArray( uExtinctionMatrix, 8 );
-ozoneExtinction.toArray( uExtinctionMatrix, 12 );
+ozoneExtinction.toArray( uExtinctionMatrix, 8 );
+cloudExtinction.toArray( uExtinctionMatrix, 12 );
 
 export const uniforms = {
     uTime: { value: 0 },

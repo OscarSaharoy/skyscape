@@ -34,9 +34,10 @@ vec4 atmosphereComp( in vec3 pos ) {
 
     res[0] = exp( - heightAboveSurface / 8000. ); // rayleigh
     res[1] = exp( - heightAboveSurface / 1200. ); // mie
-	res[2] = fbm(pos*5e-5) - 1.2; // cloud
-	res[3] = max(0., 1. - abs(heightAboveSurface - 25e+3) / 15e+3 ); // ozone
+	res[2] = max(0., 1. - abs(heightAboveSurface - 25e+3) / 15e+3 ); // ozone
+	res[3] = fbm(pos*5e-5) - 1.2; // cloud
 
+	res[3] = 0.;
 	return res;
 }
 
@@ -58,8 +59,8 @@ vec4 phase( in float cosTheta ) {
 
 	res[0] = phase( cosTheta, rayleighPhase );
 	res[1] = phase( cosTheta, miePhase );
-	res[2] = phase( cosTheta, cloudPhase ) * 1. / 12. + 1.;
-	res[3] = phase( cosTheta, ozonePhase );
+	res[2] = phase( cosTheta, ozonePhase );
+	res[3] = phase( cosTheta, cloudPhase ) * 1. / 12. + 1.;
 
 	return res;
 }
