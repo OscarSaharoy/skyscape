@@ -2,9 +2,10 @@
 
 export default `
 
-#define NO_OCEAN_INTERSECT vec3(-1)
+#define NO_OCEAN_REFLECTION vec3(-1)
+#define NO_OCEAN_INTERSECT vec4(-1)
 
-vec3 intersectOcean( vec3 viewDir ) {
+vec4 intersectOcean( vec3 viewDir ) {
 
 	if( dot( viewDir, UP ) > 0. )
 		return NO_OCEAN_INTERSECT;
@@ -14,7 +15,7 @@ vec3 intersectOcean( vec3 viewDir ) {
     vec3 earthIntersect = vec3(0) 
         + viewDir * distToEarth;
 
-	return earthIntersect;
+	return vec4( earthIntersect, distToEarth );
 }
 
 vec3 oceanReflectionDir( vec3 viewDir ) {
@@ -22,7 +23,7 @@ vec3 oceanReflectionDir( vec3 viewDir ) {
 	vec3 normal = UP;
 
 	if( dot( viewDir, normal ) > 0. )
-		return NO_OCEAN_INTERSECT;
+		return NO_OCEAN_REFLECTION;
 	
 	return reflect( viewDir, normal );
 }

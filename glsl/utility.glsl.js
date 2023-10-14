@@ -190,32 +190,6 @@ float distToSphere( vec3 rayOrigin, vec3 rayDir,
     return distToSphere;
 }
 
-// intersection through participating media (like atmospheres)
-struct mediaIntersection {
-	float tnear;   // first intersection
-	float tfar;    // last intersection
-};
-#define noIntersection mediaIntersection( -1., -1. )
-
-mediaIntersection intersectAtmosphere( in vec3 ro, in vec3 rd ) {
-
-	mediaIntersection res = noIntersection;
-
-	// atmosphere intersection
-	vec3 oc = ro - EARTH_CENTRE;
-	float b = 2. * dot(oc, rd);
-	float c = dot(oc,oc) - ATMOSPHERE_RADIUS * ATMOSPHERE_RADIUS;
-	float det = b*b - 4. * c;
-
-	if (det >= 0.) {
-
-		res.tnear = max( 0., ( -b - sqrt(det) ) / 2. );
-		res.tfar  =          ( -b + sqrt(det) ) / 2.;
-	}
-
-	return res;
-}
-
 float rand(vec2 co) {
 	return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }

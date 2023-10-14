@@ -4,6 +4,85 @@ export default `
 // atmospheric scattering specifics
 
 
+// intersection through participating media (like atmospheres)
+struct mediaIntersection {
+	float tnear;   // first intersection
+	float tfar;    // last intersection
+};
+#define noIntersection mediaIntersection( -1., -1. )
+
+mediaIntersection intersectAtmosphere( in vec3 ro, in vec3 rd ) {
+
+	mediaIntersection res = noIntersection;
+
+	// atmosphere intersection
+	vec3 oc = ro - EARTH_CENTRE;
+	float b = 2. * dot(oc, rd);
+	float c = dot(oc,oc) - ATMOSPHERE_RADIUS * ATMOSPHERE_RADIUS;
+	float det = b*b - 4. * c;
+
+	if (det >= 0.) {
+
+		res.tnear = max( 0., ( -b - sqrt(det) ) / 2. );
+		res.tfar  =          ( -b + sqrt(det) ) / 2.;
+	}
+
+	// handle earth intersection
+	/*
+	vec4 oceanIntersection = intersectOcean( rd );
+	if( oceanIntersection != NO_OCEAN_INTERSECT )
+		res.tfar = oceanIntersection.w;
+	*/
+
+	return res;
+}
+
+
+float height( vec3 p ) {
+	
+	return length( p - EARTH_CENTRE ) - EARTH_RADIUS;
+}
+
+float integrateColumn( float h ) {
+
+	return 8e+3 * (
+		exp( -h / 8e+3  )
+	);
+}
+
+float estimate(vec3 ro, vec3 rd) {
+	
+	vec3 up = vec3( 0., 1., 0. );
+	float cosTheta = dot( rd, up );
+	return integrateColumn(height(ro)) / cosTheta;
+}
+
+
+float estimate1(vec3 ro, vec3 rd) {
+	
+	vec3 down = vec3( 0.f, -1.f, 0.f );
+
+	float cosGamma = dot( rd, down );
+	float R = EARTH_RADIUS;
+	float h = 100e+3;
+
+	float h2 = R * cosGamma + sqrt(
+		R*R*cosGamma*cosGamma + 2.*R*h + h*h
+	);
+
+	return integrateColumn(height(ro)) * h2/h;
+}
+
+float estimateDepth(vec3 ro, vec3 rd) {
+
+	if( intersectSphere( ro, rd, EARTH_CENTRE, EARTH_RADIUS ).w != 0. )
+		return 1e+10;
+	
+	return estimate1(ro, rd);
+	return sqrt( estimate1(ro, rd) * estimate(ro, rd) );
+}
+
+
 vec3 lightCol = vec3(1);
 
 
@@ -37,7 +116,7 @@ vec4 atmosphereComp( in vec3 pos ) {
 	res[2] = max(0., 1. - abs(heightAboveSurface - 25e+3) / 15e+3 ); // ozone
 	res[3] = fbm(pos*5e-5) - 1.2; // cloud
 
-	res[3] = 0.;
+	res.yzw *= 0.;
 	return res;
 }
 
@@ -92,6 +171,21 @@ vec3 transmittanceToSun( in vec3 apos ) {
 	return transmittance;
 }
 
+vec3 transmittanceToSun1( in vec3 apos ) {
+
+	mediaIntersection hit = intersectAtmosphere( apos, uSunDir ); // cast ray to sun, intersect with inner edge of sphere
+	float rayLength = hit.tfar - hit.tnear;
+
+	vec3 ro = apos + uSunDir * hit.tnear;
+	vec3 rd = uSunDir;
+
+	float rayleighDepth = estimateDepth( ro, rd );
+
+	vec3 transmittance = exp( 
+		-rayleighDepth * vec3(5.80, 13.6, 33.1) * 1e-6
+	);
+	return transmittance;
+}
 
 vec3 inScatteredLight( in vec3 viewDir ) {
 
@@ -102,12 +196,12 @@ vec3 inScatteredLight( in vec3 viewDir ) {
 
 	// step through atmosphere, cast rays to lightsource to determine shadow.
 	float rayLength = hit.tfar - hit.tnear;
-	float dt = rayLength * 0.1;
+	float dt = rayLength * 0.01;
 	
 	vec3 transmittanceToViewer = vec3(1);
 	vec3 lightLastStep = vec3(0);
 
-	for( float t = hit.tnear; t < hit.tfar; t += dt ) {
+	for( float t = hit.tnear + 10.; t < hit.tfar; t += dt ) {
 
 		vec3 apos = viewDir * t; // position along atmosphere ray
 
@@ -124,7 +218,7 @@ vec3 inScatteredLight( in vec3 viewDir ) {
 		
 		vec3 scatterThisStep = (uScatteringMatrix * (phaseComp * atmComp)).xyz * dt;
 
-		vec3 influx = lightCol * transmittanceToSun( apos );
+		vec3 influx = lightCol * transmittanceToSun1( apos );
 		light += ( lightLastStep + influx * scatterThisStep * transmittanceToViewer ) / 2.;
 		vec3 lightLastStep = influx * scatterThisStep * transmittanceToViewer;
 

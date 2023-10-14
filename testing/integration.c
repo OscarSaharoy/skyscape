@@ -4,6 +4,8 @@
 #include <math.h>
 
 #define vec3(x, y, z) {x, y, z}
+#define vec4(x, y, z, w) {x, y, z, w}
+#define sqrt(x) sqrtf(x)
 
 #define EARTH_RADIUS 6360e+3
 
@@ -12,6 +14,13 @@ typedef struct {
 	float y;
 	float z;
 } vec3;
+
+typedef struct {
+	float x;
+	float y;
+	float z;
+	float w;
+} vec4;
 
 float dot( vec3 v_a, vec3 v_b ) {
 	return v_a.x * v_b.x + v_a.y * v_b.y + v_a.z * v_b.z;
@@ -60,6 +69,23 @@ float height( vec3 p ) {
 	
 	vec3 earthCentre = { 0.f, 0.f, -EARTH_RADIUS };
 	return length( sub( p, earthCentre ) ) - EARTH_RADIUS;
+}
+
+vec4 atmosphereComp( in vec3 pos ) {
+
+	// returns a vec4 of the rayleigh, mie, cloud and ozone densities at a given point
+	vec4 res = vec4(0);
+
+    float heightAboveSurface = 
+        length(pos - EARTH_CENTRE) - EARTH_RADIUS;
+
+    res[0] = exp( - heightAboveSurface / 8000. ); // rayleigh
+    res[1] = exp( - heightAboveSurface / 1200. ); // mie
+	res[2] = max(0., 1. - abs(heightAboveSurface - 25e+3) / 15e+3 ); // ozone
+	res[3] = fbm(pos*5e-5) - 1.2; // cloud
+
+	res[3] = 0.;
+	return res;
 }
 
 float integrateAlongRay(vec3 ro, vec3 rd) {
@@ -117,7 +143,7 @@ float estimate1(vec3 ro, vec3 rd) {
 	float R = EARTH_RADIUS;
 	float h = 100e+3;
 
-	float h2 = R * cosGamma + sqrtf(
+	float h2 = R * cosGamma + sqrt(
 		R*R*cosGamma*cosGamma + 2.*R*h + h*h
 	);
 
@@ -126,7 +152,7 @@ float estimate1(vec3 ro, vec3 rd) {
 
 float estimate2(vec3 ro, vec3 rd) {
 	
-	return sqrtf( estimate1(ro, rd) * estimate(ro, rd) );
+	return sqrt( estimate1(ro, rd) * estimate(ro, rd) );
 }
 
 

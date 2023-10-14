@@ -28,9 +28,9 @@ void main() {
 	//light += moonLight( viewDir );
 	//light += atmosphereNoise( viewDir );
     //light += oceanLight( viewDir, light );
-	//light += sunLight( viewDir );
+	light += sunLight( viewDir );
 
-    light += texture2D(uAtmosphereLight, gl_FragCoord.xy/uResolution).xyz / (uFramesStationary + 1.);
+    light += texture2D(uAtmosphereLight, gl_FragCoord.xy/uResolution).xyz;
 
 	//light += gl_FragCoord.xyy / uResolution.xyy;
 	//light += unProjected.xyz / unProjected.w;
@@ -38,7 +38,7 @@ void main() {
 	//light += uUnProjectionMatrix[3].xyw;
 
 	vec3 reflectedViewDir = oceanReflectionDir( viewDir );
-	if( reflectedViewDir != NO_OCEAN_INTERSECT ) {
+	if( reflectedViewDir != NO_OCEAN_REFLECTION ) {
 		vec4 ndc = uProjectionMatrix * vec4( reflectedViewDir, 1. );
 		vec2 fragCoord = ( ( ndc.xy / ndc.w ) + 1. ) / 2.;
 		if( fragCoord.y < 1. )

@@ -21,12 +21,12 @@ void main() {
     vec3 viewDir = normalize(vNormal);
     vec3 light = vec3(0);
 
-	//light += inScatteredLight( viewDir );
+	light += inScatteredLight( viewDir );
 
 	vec3 reflectedViewDir = oceanReflectionDir( viewDir );
-	if( reflectedViewDir == NO_OCEAN_INTERSECT ) {
+	if( reflectedViewDir == NO_OCEAN_REFLECTION ) {
 		vec3 totalTransmittance = vec3(1.0);
-		light += mainRay(vec3(0), viewDir, normalize(vec3(1)), totalTransmittance, 0., true);
+		//light += mainRay(vec3(0), viewDir, normalize(vec3(1)), totalTransmittance, 0., true);
 	}
 
 	gl_FragColor = vec4( light, 1. );
