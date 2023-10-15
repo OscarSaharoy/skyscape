@@ -10,8 +10,12 @@ import atmosphereLightFragmentShader from "../glsl/atmosphereLightFragment.glsl.
 
 // setup 2 alternating render targets
 export const atmosphereLightBuffers = [
+/*
 	new THREE.WebGLRenderTarget( 1, 1, { depthBuffer: false, magFilter: THREE.LinearFilter, minFilter: THREE.NearestFilter, wrapS: THREE.MirroredRepeatWrapping } ),
 	new THREE.WebGLRenderTarget( 1, 1, { depthBuffer: false, magFilter: THREE.LinearFilter, minFilter: THREE.NearestFilter, wrapS: THREE.MirroredRepeatWrapping } ),
+*/
+	new THREE.WebGLRenderTarget( 1, 1, { depthBuffer: false, type: floatType, magFilter: THREE.NearestFilter, minFilter: THREE.NearestFilter } ),
+    new THREE.WebGLRenderTarget( 1, 1, { depthBuffer: false, type: floatType, magFilter: THREE.NearestFilter, minFilter: THREE.NearestFilter } ),
 ];
 
 

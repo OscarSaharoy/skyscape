@@ -41,14 +41,12 @@ void main() {
 	if( reflectedViewDir != NO_OCEAN_REFLECTION ) {
 		vec4 ndc = uProjectionMatrix * vec4( reflectedViewDir, 1. );
 		vec2 fragCoord = ( ( ndc.xy / ndc.w ) + 1. ) / 2.;
-		if( fragCoord.y < 1. )
+		if( fragCoord.y < 1. ) {
 			light += texture2D(uAtmosphereLight, fragCoord).xyz / (uFramesStationary + 1.);
+			light += vec3(0,0.004,0.01);
+		}
 	}
 	
-	// reinhardt HDR tonemapping
-    float whitelevel = 5.;
-    light = ( light * (vec3(1.0) + (light / (whitelevel * whitelevel)) ) ) / (vec3(1.0) + light);
-
 	// gamma correction
     light = pow(light , vec3(1. / 2.2));
 

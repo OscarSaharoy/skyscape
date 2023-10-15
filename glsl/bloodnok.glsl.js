@@ -196,17 +196,17 @@ vec3 inScatteredLight( in vec3 viewDir ) {
 
 	// step through atmosphere, cast rays to lightsource to determine shadow.
 	float rayLength = hit.tfar - hit.tnear;
-	float dt = rayLength * 0.01;
+	float dt = rayLength * 0.1;
 	
 	vec3 transmittanceToViewer = vec3(1);
 	vec3 lightLastStep = vec3(0);
 
-	for( float t = hit.tnear + 10.; t < hit.tfar; t += dt ) {
+	for( float t = hit.tnear; t < hit.tfar; t += dt ) {
 
 		vec3 apos = viewDir * t; // position along atmosphere ray
 
 		vec4 atmComp = atmosphereComp( apos );
-		dt = stepSize( atmComp, rayLength );
+		//dt = stepSize( atmComp, rayLength );
 		atmComp = clampPositive( atmComp );
 
 		float cosTheta = dot(viewDir,uSunDir);

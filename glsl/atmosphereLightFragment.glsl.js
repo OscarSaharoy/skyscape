@@ -21,11 +21,10 @@ void main() {
     vec3 viewDir = normalize(vNormal);
     vec3 light = vec3(0);
 
-	light += inScatteredLight( viewDir );
-
 	vec3 reflectedViewDir = oceanReflectionDir( viewDir );
 	if( reflectedViewDir == NO_OCEAN_REFLECTION ) {
 		vec3 totalTransmittance = vec3(1.0);
+		light += inScatteredLight( viewDir );
 		//light += mainRay(vec3(0), viewDir, normalize(vec3(1)), totalTransmittance, 0., true);
 	}
 
