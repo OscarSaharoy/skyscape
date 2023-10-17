@@ -52,7 +52,9 @@ void main() {
 		vec2 fragCoord = ( ( ndc.xy / ndc.w ) + 1. ) / 2.;
 		vec3 skyLight = inScatteredLight( reflectedViewDir );
 		float cosTheta = dot(viewDir, DOWN);
-		float fresnel = 1. - 30.05 * cosTheta + 29.15 * pow(cosTheta, 1.05);
+		float fresnel =
+			0.7 * pow( cosTheta - 0.62, 2. )
+			+ 0.72 * pow( 2., -8. * cosTheta );
 		light += skyLight * fresnel;
 	}
 	
