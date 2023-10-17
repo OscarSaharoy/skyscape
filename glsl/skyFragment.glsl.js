@@ -6,6 +6,8 @@ import stars from "./stars.glsl.js";
 import sun from "./sun.glsl.js";
 import moon from "./moon.glsl.js";
 import ocean from "./ocean.glsl.js";
+import bloodnok from "./bloodnok.glsl.js";
+import alro from "./alro.glsl.js";
 
 
 export default
@@ -16,6 +18,8 @@ stars +
 sun +
 moon +
 ocean +
+bloodnok +
+alro +
 `
 
 void main() {
@@ -30,23 +34,26 @@ void main() {
     //light += oceanLight( viewDir, light );
 	light += sunLight( viewDir );
 
-    light += texture2D(uAtmosphereLight, gl_FragCoord.xy/uResolution).xyz;
+    //light += texture2D(uAtmosphereLight, gl_FragCoord.xy/uResolution).xyz;
 
 	//light += gl_FragCoord.xyy / uResolution.xyy;
 	//light += unProjected.xyz / unProjected.w;
 	//light += viewDir;
 	//light += uUnProjectionMatrix[3].xyw;
-
+	//
 	vec3 reflectedViewDir = oceanReflectionDir( viewDir );
+	if( reflectedViewDir == NO_OCEAN_REFLECTION ) {
+		vec3 totalTransmittance = vec3(1.0);
+		light += inScatteredLight( viewDir );
+	}
+
 	if( reflectedViewDir != NO_OCEAN_REFLECTION ) {
 		vec4 ndc = uProjectionMatrix * vec4( reflectedViewDir, 1. );
 		vec2 fragCoord = ( ( ndc.xy / ndc.w ) + 1. ) / 2.;
-		if( fragCoord.y < 1. ) {
-			vec3 skyLight = texture2D(uAtmosphereLight, fragCoord).xyz / (uFramesStationary + 1.);
-			float cosTheta = dot(viewDir, DOWN);
-			float fresnel = 1. - 30.05 * cosTheta + 29.15 * pow(cosTheta, 1.05);
-			light += skyLight * fresnel;
-		}
+		vec3 skyLight = inScatteredLight( reflectedViewDir );
+		float cosTheta = dot(viewDir, DOWN);
+		float fresnel = 1. - 30.05 * cosTheta + 29.15 * pow(cosTheta, 1.05);
+		light += skyLight * fresnel;
 	}
 	
 	// gamma correction

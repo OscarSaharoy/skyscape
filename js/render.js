@@ -21,7 +21,7 @@ import { renderAtmosphereLight } from "./atmosphere-light.js";
 	updateTimingUniforms( timestampMillis );
 	if( uniforms.uFramesStationary.value++ >= 1 ) return;
 
-	renderAtmosphereLight( renderer, camera );
+	//renderAtmosphereLight( renderer, camera );
 	renderScreen( renderer, camera );
 } )();
 
