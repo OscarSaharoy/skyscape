@@ -74,10 +74,6 @@ float estimate1(vec3 ro, vec3 rd) {
 }
 
 float estimateDepth(vec3 ro, vec3 rd) {
-
-	if( intersectSphere( ro, rd, EARTH_CENTRE, EARTH_RADIUS ).w != 0. )
-		return 1e+10;
-	
 	return estimate1(ro, rd);
 	return sqrt( estimate1(ro, rd) * estimate(ro, rd) );
 }
@@ -144,7 +140,10 @@ vec4 phase( in float cosTheta ) {
 	return res;
 }
 
-vec3 transmittanceToSun( in vec3 apos ) {
+vec3 transmittanceToSun1( in vec3 apos ) {
+
+	if( intersectSphere( apos, uSunDir, EARTH_CENTRE, EARTH_RADIUS ).w != 0. )
+		return vec3(0);
 
 	mediaIntersection hit = intersectAtmosphere( apos, uSunDir ); // cast ray to sun, intersect with inner edge of sphere
 	float rayLength = hit.tfar - hit.tnear;
@@ -171,7 +170,10 @@ vec3 transmittanceToSun( in vec3 apos ) {
 	return transmittance;
 }
 
-vec3 transmittanceToSun1( in vec3 apos ) {
+vec3 transmittanceToSun( in vec3 apos ) {
+
+	if( intersectSphere( apos, uSunDir, EARTH_CENTRE, EARTH_RADIUS ).w != 0. )
+		return vec3(0);
 
 	mediaIntersection hit = intersectAtmosphere( apos, uSunDir ); // cast ray to sun, intersect with inner edge of sphere
 	float rayLength = hit.tfar - hit.tnear;
@@ -201,7 +203,7 @@ vec3 inScatteredLight( in vec3 viewDir ) {
 	vec3 transmittanceToViewer = vec3(1);
 	vec3 lightLastStep = vec3(0);
 
-	for( float t = hit.tnear; t < hit.tfar; t += dt ) {
+	for( float t = hit.tnear + dt/2.; t < hit.tfar; t += dt ) {
 
 		vec3 apos = viewDir * t; // position along atmosphere ray
 
@@ -218,7 +220,7 @@ vec3 inScatteredLight( in vec3 viewDir ) {
 		
 		vec3 scatterThisStep = (uScatteringMatrix * (phaseComp * atmComp)).xyz * dt;
 
-		vec3 influx = lightCol * transmittanceToSun1( apos );
+		vec3 influx = lightCol * transmittanceToSun( apos );
 		light += ( lightLastStep + influx * scatterThisStep * transmittanceToViewer ) / 2.;
 		vec3 lightLastStep = influx * scatterThisStep * transmittanceToViewer;
 
